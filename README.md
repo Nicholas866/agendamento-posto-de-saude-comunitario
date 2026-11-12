@@ -84,7 +84,7 @@ Boas práticas adotadas no desenho do sistema:
 | --- | --- |
 | Aplicação web | Next.js |
 | Banco de dados e autenticação | Supabase |
-| Editor com apoio de IA | Cursor |
+| Editor com apoio de IA | OpenCode |
 | Editor de código | VS Code |
 | Protótipos das telas | Figma |
 | Controle de versão | Git e GitHub |
