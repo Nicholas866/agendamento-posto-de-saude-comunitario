@@ -67,6 +67,28 @@ export type ConsultaAgenda = {
   fim: string;
 };
 
+export type ConsultaDetalhe = {
+  id: string;
+  status: StatusConsulta;
+  criado_em: string;
+  atualizado_em: string;
+  paciente: {
+    id: string;
+    nome: string;
+    cpf_ou_cartao_sus: string;
+    telefone: string;
+    email: string | null;
+  };
+  horario: {
+    id: string;
+    inicio: string;
+    fim: string;
+    profissional_id: string;
+    profissional_nome: string;
+    especialidade: string;
+  };
+};
+
 export type EstadoFormulario = {
   ok: boolean;
   erros: Record<string, string>;

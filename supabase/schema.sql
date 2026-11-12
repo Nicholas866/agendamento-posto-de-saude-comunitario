@@ -137,7 +137,7 @@ create trigger consultas_atualiza_timestamp
   for each row execute function public.atualizar_timestamp();
 
 -- Mantém horarios.status coerente com as consultas:
--- consulta ativa ocupa o horário; cancelada libera.
+-- consulta ativa ocupa o horário; sem consulta ativa, ele fica livre.
 create or replace function public.sincronizar_status_horario()
 returns trigger
 language plpgsql
@@ -145,25 +145,49 @@ security definer
 set search_path = public
 as $$
 begin
-  if tg_op = 'INSERT' then
-    if new.status <> 'cancelada' then
-      update public.horarios set status = 'ocupado' where id = new.horario_id;
-    end if;
+  -- Horário antigo: em UPDATE que trocou de horário e em DELETE.
+  if tg_op in ('UPDATE', 'DELETE') then
+    update public.horarios h
+       set status = case
+         when exists (
+           select 1
+           from public.consultas c
+           where c.horario_id = h.id
+             and c.status <> 'cancelada'
+         ) then 'ocupado'
+         else 'livre'
+       end
+     where h.id = old.horario_id;
+  end if;
 
+  -- Horário novo: em INSERT e em UPDATE que trocou de horário.
+  -- No UPDATE em que o horário não mudou, o bloco acima já resolveu.
+  if tg_op = 'INSERT' then
+    update public.horarios h
+       set status = case
+         when exists (
+           select 1
+           from public.consultas c
+           where c.horario_id = h.id
+             and c.status <> 'cancelada'
+         ) then 'ocupado'
+         else 'livre'
+       end
+     where h.id = new.horario_id;
   elsif tg_op = 'UPDATE' then
     if new.horario_id is distinct from old.horario_id then
-      update public.horarios set status = 'livre' where id = old.horario_id;
-      if new.status <> 'cancelada' then
-        update public.horarios set status = 'ocupado' where id = new.horario_id;
-      end if;
-    elsif new.status = 'cancelada' and old.status <> 'cancelada' then
-      update public.horarios set status = 'livre' where id = new.horario_id;
-    elsif new.status <> 'cancelada' and old.status = 'cancelada' then
-      update public.horarios set status = 'ocupado' where id = new.horario_id;
+      update public.horarios h
+         set status = case
+           when exists (
+             select 1
+             from public.consultas c
+             where c.horario_id = h.id
+               and c.status <> 'cancelada'
+           ) then 'ocupado'
+           else 'livre'
+         end
+       where h.id = new.horario_id;
     end if;
-
-  elsif tg_op = 'DELETE' then
-    update public.horarios set status = 'livre' where id = old.horario_id;
   end if;
 
   return null;

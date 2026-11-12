@@ -39,6 +39,11 @@ export function hojeSP(): string {
   return formatadorISO.format(new Date());
 }
 
+/** Verifica se o instante ISO ainda está no futuro. */
+export function estaNoFuturo(iso: string): boolean {
+  return new Date(iso).getTime() > Date.now();
+}
+
 /** Data (AAAA-MM-DD) de um instante ISO no fuso de São Paulo. */
 export function dataSP(iso: string): string {
   return formatadorISO.format(new Date(iso));

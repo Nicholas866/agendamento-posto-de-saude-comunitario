@@ -2,13 +2,19 @@
 
 import { redirect } from "next/navigation";
 
-import { dataDentroDoLimite, dataSP, hojeSP } from "@/lib/datahora";
+import {
+  dataDentroDoLimite,
+  dataSP,
+  estaNoFuturo,
+  hojeSP,
+} from "@/lib/datahora";
+import { buscarConsultaParaAcao } from "@/lib/dados/consultas";
 import { buscarHorario } from "@/lib/dados/horarios";
 import { buscarPaciente } from "@/lib/dados/pacientes";
 import { exigirPapel } from "@/lib/auth";
 import { mensagemDeErroBanco } from "@/lib/erros";
 import { createClient } from "@/lib/supabase/server";
-import type { AcaoFormulario } from "@/lib/tipos";
+import { UUID_REGEX, type AcaoFormulario } from "@/lib/tipos";
 import { validarNovaConsulta } from "@/lib/validacao-agenda";
 
 export const criarConsulta: AcaoFormulario = async (_estado, formData) => {
@@ -118,3 +124,170 @@ export const criarConsulta: AcaoFormulario = async (_estado, formData) => {
 
   redirect(`/agenda?data=${data}&sucesso=criada`);
 };
+
+type Retorno = "agenda" | "detalhe";
+
+function normalizarRetorno(valor: unknown): Retorno {
+  return valor === "detalhe" ? "detalhe" : "agenda";
+}
+
+function destinoSucesso(
+  id: string,
+  dataConsulta: string,
+  retorno: Retorno,
+  sucesso: string,
+): string {
+  return retorno === "detalhe"
+    ? `/consultas/${id}?sucesso=${sucesso}`
+    : `/agenda?data=${dataConsulta}&sucesso=${sucesso}`;
+}
+
+function destinoErro(
+  id: string,
+  dataConsulta: string,
+  retorno: Retorno,
+  erro: string,
+): string {
+  return retorno === "detalhe"
+    ? `/consultas/${id}?erro=${erro}`
+    : `/agenda?data=${dataConsulta}&erro=${erro}`;
+}
+
+export async function cancelarConsulta(formData: FormData) {
+  await exigirPapel("recepcao", "admin");
+
+  const id = String(formData.get("id") ?? "");
+  const retorno = normalizarRetorno(formData.get("retorno"));
+
+  if (!UUID_REGEX.test(id)) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const consulta = await buscarConsultaParaAcao(id);
+
+  if (!consulta) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const dataConsulta = dataSP(consulta.inicio);
+
+  if (consulta.status !== "agendada" && consulta.status !== "confirmada") {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  if (!estaNoFuturo(consulta.inicio)) {
+    redirect(destinoErro(id, dataConsulta, retorno, "passado"));
+  }
+
+  const supabase = await createClient();
+  const { data: atualizadas, error } = await supabase
+    .from("consultas")
+    .update({ status: "cancelada" })
+    .eq("id", id)
+    .in("status", ["agendada", "confirmada"])
+    .select("id");
+
+  if (error) {
+    redirect(destinoErro(id, dataConsulta, retorno, "salvar"));
+  }
+
+  if (!atualizadas || atualizadas.length === 0) {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  redirect(destinoSucesso(id, dataConsulta, retorno, "cancelada"));
+}
+
+export async function marcarPresenca(formData: FormData) {
+  await exigirPapel("recepcao", "admin");
+
+  const id = String(formData.get("id") ?? "");
+  const resultado = String(formData.get("resultado") ?? "");
+  const retorno = normalizarRetorno(formData.get("retorno"));
+
+  if (
+    !UUID_REGEX.test(id) ||
+    (resultado !== "realizada" && resultado !== "faltou")
+  ) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const consulta = await buscarConsultaParaAcao(id);
+
+  if (!consulta) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const dataConsulta = dataSP(consulta.inicio);
+
+  if (consulta.status !== "agendada" && consulta.status !== "confirmada") {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  if (dataConsulta > hojeSP()) {
+    redirect(destinoErro(id, dataConsulta, retorno, "futuro"));
+  }
+
+  const supabase = await createClient();
+  const { data: atualizadas, error } = await supabase
+    .from("consultas")
+    .update({ status: resultado })
+    .eq("id", id)
+    .in("status", ["agendada", "confirmada"])
+    .select("id");
+
+  if (error) {
+    redirect(destinoErro(id, dataConsulta, retorno, "salvar"));
+  }
+
+  if (!atualizadas || atualizadas.length === 0) {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  redirect(destinoSucesso(id, dataConsulta, retorno, resultado));
+}
+
+export async function desfazerPresenca(formData: FormData) {
+  await exigirPapel("recepcao", "admin");
+
+  const id = String(formData.get("id") ?? "");
+  const retorno = normalizarRetorno(formData.get("retorno"));
+
+  if (!UUID_REGEX.test(id)) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const consulta = await buscarConsultaParaAcao(id);
+
+  if (!consulta) {
+    redirect("/agenda?erro=invalido");
+  }
+
+  const dataConsulta = dataSP(consulta.inicio);
+
+  if (consulta.status !== "realizada" && consulta.status !== "faltou") {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  if (dataConsulta > hojeSP()) {
+    redirect(destinoErro(id, dataConsulta, retorno, "futuro"));
+  }
+
+  const supabase = await createClient();
+  const { data: atualizadas, error } = await supabase
+    .from("consultas")
+    .update({ status: "agendada" })
+    .eq("id", id)
+    .in("status", ["realizada", "faltou"])
+    .select("id");
+
+  if (error) {
+    redirect(destinoErro(id, dataConsulta, retorno, "salvar"));
+  }
+
+  if (!atualizadas || atualizadas.length === 0) {
+    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+  }
+
+  redirect(destinoSucesso(id, dataConsulta, retorno, "desfeita"));
+}

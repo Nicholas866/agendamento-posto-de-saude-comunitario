@@ -11,8 +11,14 @@ import {
   somarDias,
 } from "@/lib/datahora";
 import { listarConsultasDoDia } from "@/lib/dados/consultas";
+import {
+  mensagemErroConsulta,
+  mensagemSucessoConsulta,
+} from "@/lib/mensagens-consulta";
 import type { ConsultaAgenda } from "@/lib/tipos";
 import { normalizarDataFiltro } from "@/lib/validacao-agenda";
+
+import { AcoesConsulta } from "../consultas/acoes-consulta";
 
 type GrupoProfissional = {
   profissional_id: string;
@@ -47,10 +53,6 @@ function agruparPorProfissional(
   );
 }
 
-const MENSAGENS_SUCESSO: Record<string, string> = {
-  criada: "Consulta agendada com sucesso.",
-};
-
 export default async function AgendaPage({
   searchParams,
 }: {
@@ -83,9 +85,8 @@ export default async function AgendaPage({
   const proximo = somarDias(data, 1);
   const podeMarcar = perfil.papel === "recepcao" || perfil.papel === "admin";
 
-  const mensagemSucesso = parametros.sucesso
-    ? MENSAGENS_SUCESSO[parametros.sucesso]
-    : undefined;
+  const mensagemSucesso = mensagemSucessoConsulta(parametros.sucesso);
+  const mensagemErro = mensagemErroConsulta(parametros.erro);
 
   return (
     <div className="space-y-8">
@@ -110,9 +111,7 @@ export default async function AgendaPage({
       {mensagemSucesso ? (
         <Alerta tipo="sucesso">{mensagemSucesso}</Alerta>
       ) : null}
-      {parametros.erro === "sem-permissao" ? (
-        <Alerta tipo="erro">Seu perfil não tem acesso a essa página.</Alerta>
-      ) : null}
+      {mensagemErro ? <Alerta tipo="erro">{mensagemErro}</Alerta> : null}
 
       <section className="rounded-2xl border-2 border-gray-200 bg-white p-6">
         <form
@@ -232,7 +231,26 @@ export default async function AgendaPage({
                       </div>
                     </div>
 
-                    <StatusConsultaBadge status={consulta.status} />
+                    <div className="flex flex-col items-start gap-3 sm:items-end">
+                      <StatusConsultaBadge status={consulta.status} />
+
+                      <Link
+                        href={`/consultas/${consulta.id}`}
+                        className="rounded-xl border-2 border-gray-400 px-4 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 sm:text-lg"
+                      >
+                        Detalhes
+                      </Link>
+
+                      <AcoesConsulta
+                        consulta={{
+                          id: consulta.id,
+                          status: consulta.status,
+                          inicio: consulta.inicio,
+                        }}
+                        podeGerenciar={podeMarcar}
+                        origem="agenda"
+                      />
+                    </div>
                   </li>
                 ))}
               </ul>
