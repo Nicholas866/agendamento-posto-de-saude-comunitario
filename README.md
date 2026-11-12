@@ -89,7 +89,6 @@ Boas práticas adotadas no desenho do sistema:
 | Protótipos das telas | Figma |
 | Controle de versão | Git e GitHub |
 
-> O código gerado com apoio de IA é sempre lido, testado e entendido pelos alunos, principalmente o que trata de dados de saúde.
 
 ## Metodologia e cronograma
 
