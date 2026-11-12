@@ -61,6 +61,7 @@ create table if not exists public.horarios (
   fim timestamptz not null,
   status text not null default 'livre'
     check (status in ('livre', 'ocupado')),
+  removido_em timestamptz,
   criado_em timestamptz not null default now(),
   constraint horario_fim_apos_inicio check (fim > inicio),
   constraint horario_unico_por_profissional unique (profissional_id, inicio)
@@ -68,6 +69,9 @@ create table if not exists public.horarios (
 
 comment on table public.horarios is
   'Horários liberados pela equipe. inicio/fim em timestamptz; a interface exibe em America/Sao_Paulo.';
+
+comment on column public.horarios.removido_em is
+  'Quando preenchido, o horário foi removido pela equipe e não aparece mais para novas consultas.';
 
 create table if not exists public.consultas (
   id uuid primary key default gen_random_uuid(),
@@ -183,6 +187,7 @@ set search_path = public
 as $$
 declare
   v_inicio timestamptz;
+  v_removido_em timestamptz;
 begin
   -- Só pula a validação quando o horário não mudou e a consulta não está
   -- sendo reativada (cancelada -> agendada/confirmada).
@@ -192,12 +197,16 @@ begin
     return new;
   end if;
 
-  select inicio into v_inicio
+  select inicio, removido_em into v_inicio, v_removido_em
   from public.horarios
   where id = new.horario_id;
 
   if v_inicio is null then
     raise exception 'Horário inexistente.';
+  end if;
+
+  if v_removido_em is not null then
+    raise exception 'Este horário não existe mais.';
   end if;
 
   if new.status <> 'cancelada' then

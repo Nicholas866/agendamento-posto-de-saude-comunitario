@@ -14,7 +14,7 @@ export default async function SistemaLayout({
   children: React.ReactNode;
 }) {
   const perfil = await exigirPerfil();
-  const podeVerPainel =
+  const podeGerenciar =
     perfil.papel === "admin" || perfil.papel === "recepcao";
 
   return (
@@ -53,7 +53,7 @@ export default async function SistemaLayout({
 
         <nav
           aria-label="Menu principal"
-          className="mx-auto flex w-full max-w-5xl gap-2 px-6 pb-3"
+          className="mx-auto flex w-full max-w-5xl flex-wrap gap-2 px-6 pb-3"
         >
           <Link
             href="/agenda"
@@ -61,6 +61,22 @@ export default async function SistemaLayout({
           >
             Agenda
           </Link>
+          {podeGerenciar ? (
+            <>
+              <Link
+                href="/consultas/nova"
+                className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
+              >
+                Nova consulta
+              </Link>
+              <Link
+                href="/horarios"
+                className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
+              >
+                Horários
+              </Link>
+            </>
+          ) : null}
           <Link
             href="/pacientes"
             className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
@@ -75,7 +91,7 @@ export default async function SistemaLayout({
               Profissionais
             </Link>
           ) : null}
-          {podeVerPainel ? (
+          {podeGerenciar ? (
             <Link
               href="/painel"
               className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"

@@ -3,7 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase/config";
 
-const ROTAS_PROTEGIDAS = ["/agenda", "/painel", "/pacientes", "/profissionais"];
+const ROTAS_PROTEGIDAS = [
+  "/agenda",
+  "/painel",
+  "/pacientes",
+  "/profissionais",
+  "/horarios",
+  "/consultas",
+];
 
 function rotaProtegida(pathname: string) {
   return ROTAS_PROTEGIDAS.some(

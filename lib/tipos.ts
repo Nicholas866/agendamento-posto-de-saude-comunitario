@@ -18,6 +18,55 @@ export type Profissional = {
   criado_em: string;
 };
 
+export type StatusHorario = "livre" | "ocupado";
+
+export type StatusConsulta =
+  | "agendada"
+  | "confirmada"
+  | "cancelada"
+  | "faltou"
+  | "realizada";
+
+export type Horario = {
+  id: string;
+  profissional_id: string;
+  inicio: string;
+  fim: string;
+  status: StatusHorario;
+  removido_em: string | null;
+  criado_em: string;
+};
+
+export type HorarioComProfissional = Horario & {
+  profissionais: {
+    id: string;
+    nome: string;
+    especialidade: string;
+    ativo: boolean;
+  } | null;
+};
+
+export type Consulta = {
+  id: string;
+  paciente_id: string;
+  horario_id: string;
+  status: StatusConsulta;
+  token_confirmacao: string;
+  criado_em: string;
+  atualizado_em: string;
+};
+
+export type ConsultaAgenda = {
+  id: string;
+  status: StatusConsulta;
+  paciente_nome: string;
+  profissional_id: string;
+  profissional_nome: string;
+  especialidade: string;
+  inicio: string;
+  fim: string;
+};
+
 export type EstadoFormulario = {
   ok: boolean;
   erros: Record<string, string>;

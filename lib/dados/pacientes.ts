@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Paciente } from "@/lib/tipos";
 import { UUID_REGEX } from "@/lib/tipos";
 
-const LIMITE = 50;
+const LIMITE_PADRAO = 50;
 
 /** Remove caracteres que quebram o filtro do PostgREST. */
 function sanitizarTermo(termo: string): string {
@@ -13,7 +13,10 @@ function sanitizarTermo(termo: string): string {
     .slice(0, 80);
 }
 
-export async function listarPacientes(termo: string): Promise<Paciente[]> {
+export async function listarPacientes(
+  termo: string,
+  limite = LIMITE_PADRAO,
+): Promise<Paciente[]> {
   const supabase = await createClient();
   const busca = sanitizarTermo(termo);
 
@@ -21,7 +24,7 @@ export async function listarPacientes(termo: string): Promise<Paciente[]> {
     .from("pacientes")
     .select("*")
     .order("nome", { ascending: true })
-    .limit(LIMITE);
+    .limit(limite);
 
   if (busca) {
     const digitos = busca.replace(/\D/g, "");
