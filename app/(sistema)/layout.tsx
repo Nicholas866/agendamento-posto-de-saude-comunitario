@@ -61,6 +61,20 @@ export default async function SistemaLayout({
           >
             Agenda
           </Link>
+          <Link
+            href="/pacientes"
+            className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
+          >
+            Pacientes
+          </Link>
+          {perfil.papel === "admin" ? (
+            <Link
+              href="/profissionais"
+              className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
+            >
+              Profissionais
+            </Link>
+          ) : null}
           {podeVerPainel ? (
             <Link
               href="/painel"

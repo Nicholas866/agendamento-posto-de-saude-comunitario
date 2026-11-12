@@ -19,12 +19,17 @@ begin;
 -- ---------------------------------------------------------------------
 insert into public.pacientes (id, nome, cpf_ou_cartao_sus, telefone, email, canal_preferido)
 values
-  ('00000000-0000-4000-8000-000000000101', 'Maria Aparecida Souza', '000.000.000-01', '(16) 90000-0001', 'paciente1@exemplo.com', 'email'),
-  ('00000000-0000-4000-8000-000000000102', 'João Carlos Lima', '000.000.000-02', '(16) 90000-0002', 'paciente2@exemplo.com', 'whatsapp'),
-  ('00000000-0000-4000-8000-000000000103', 'Ana Paula Ferreira', '000.000.000-03', '(16) 90000-0003', 'paciente3@exemplo.com', 'email'),
-  ('00000000-0000-4000-8000-000000000104', 'José Roberto Alves', '000.000.000-04', '(16) 90000-0004', 'paciente4@exemplo.com', 'sms'),
-  ('00000000-0000-4000-8000-000000000105', 'Francisca Gomes da Silva', '000.000.000-05', '(16) 90000-0005', 'paciente5@exemplo.com', 'email')
-on conflict (id) do nothing;
+  ('00000000-0000-4000-8000-000000000101', 'Maria Aparecida Souza', '00000000001', '16900000001', 'paciente1@exemplo.com', 'email'),
+  ('00000000-0000-4000-8000-000000000102', 'João Carlos Lima', '00000000002', '16900000002', 'paciente2@exemplo.com', 'whatsapp'),
+  ('00000000-0000-4000-8000-000000000103', 'Ana Paula Ferreira', '00000000003', '16900000003', 'paciente3@exemplo.com', 'email'),
+  ('00000000-0000-4000-8000-000000000104', 'José Roberto Alves', '00000000004', '16900000004', 'paciente4@exemplo.com', 'sms'),
+  ('00000000-0000-4000-8000-000000000105', 'Francisca Gomes da Silva', '00000000005', '16900000005', 'paciente5@exemplo.com', 'email')
+on conflict (id) do update set
+  nome = excluded.nome,
+  cpf_ou_cartao_sus = excluded.cpf_ou_cartao_sus,
+  telefone = excluded.telefone,
+  email = excluded.email,
+  canal_preferido = excluded.canal_preferido;
 
 -- ---------------------------------------------------------------------
 -- Profissionais (2)

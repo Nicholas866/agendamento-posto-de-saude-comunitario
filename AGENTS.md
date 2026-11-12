@@ -32,6 +32,9 @@ Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde c
 - Interface em **português do Brasil**, letras grandes, alto contraste — público: recepcionistas e idosos.
 - Perfis: `recepcao`, `profissional`, `admin`. **Paciente não tem login**: confirma/cancela por link no e-mail.
 - Regras de negócio: antecedência máxima de 30 dias; um horário nunca com dois pacientes; cancelar libera o horário para a lista de espera.
+- CPF/Cartão SUS e telefone são gravados **somente com dígitos** (normalização em `lib/validacao.ts`); a exibição formatada fica em `lib/formatacao.ts`.
+- Profissionais nunca são apagados: `ativo = false` só os remove de novos horários (Fase 3). Consultas existentes continuam válidas.
+- Nunca logar nome, CPF, telefone ou e-mail de paciente. Erros do banco são traduzidos em `lib/erros.ts` usando apenas o código do Postgres.
 - LGPD: guardar o mínimo (sem diagnóstico/prontuário), acesso por perfil e **somente dados fictícios** em dev/testes.
 
 ## Fluxo de trabalho
