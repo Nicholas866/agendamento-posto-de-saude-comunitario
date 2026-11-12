@@ -1,30 +1,34 @@
 # AGENTS.md
 
-Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde comunitário. O `README.md` é a fonte de requisitos; leia antes de planejar mudanças.
+Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde comunitário. Requisitos em `README.md`; roteiro de fases em `PLANO.md`. Leia os dois antes de planejar.
 
-## Estado atual (importante)
+## Comandos
 
-- O repositório contém **apenas** `README.md` (e `.git`). Não existe `package.json`, código ou configuração.
-- Não invente scripts (`npm run lint`, `npm test`, etc.) nem caminhos de arquivos: eles ainda não existem. Ao criar o scaffold, documente os comandos reais aqui.
-- Branch única: `main`, sincronizada com `origin/main`. Features devem ir em branches próprias e entrar por PR.
+- O Node **não está no PATH** do shell do agente. Use `C:\Program Files\nodejs\npm.cmd` (o PowerShell bloqueia `npm.ps1` por ExecutionPolicy) ou rode `$env:PATH = "C:\Program Files\nodejs;" + $env:PATH` antes.
+- `npm run dev` · `npm run build` · `npm run lint` · `npm start`.
+- Não há suíte de testes configurada.
 
-## Stack definida
+## Stack e estrutura
 
-- Next.js (App Router) + TypeScript + Tailwind CSS + Supabase (banco e autenticação).
-- Não instalar dependências extras sem avisar o usuário primeiro.
+- Next.js 16 (App Router, Turbopack, Cache Components), React 19, TypeScript, Tailwind CSS v4 via `@tailwindcss/turbopack`.
+- Tailwind v4: **não existe** `tailwind.config.*`; estilos e tokens ficam em `app/globals.css` (`@theme inline`).
+- Rotas em `app/`. Cliente Supabase sob demanda em `lib/supabase.ts` (`getSupabaseClient()`, `isSupabaseConfigured`) — evita quebrar o build sem credenciais.
+- Fonte do sistema (sem `next/font/google`) para o build funcionar offline e manter leitura simples.
+- Não instalar dependências extras sem avisar o usuário.
+
+## Ambiente
+
+- `.env.local` (ignorado pelo Git) recebe `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`; `.env.example` é versionado com valores vazios.
+- Nunca commitar chaves. A página inicial só indica se o Supabase está configurado; não inventar credenciais.
 
 ## Convenções do produto
 
-- Interface em **português do Brasil**, simples, letras grandes, alto contraste — público: recepcionistas e idosos.
-- Perfis de usuário: `recepcao`, `profissional` e `admin`. **Paciente não tem login**: confirma/cancela consulta por link enviado no e-mail.
-- Regras de negócio obrigatórias:
-  - antecedência máxima de 30 dias para agendar;
-  - um horário nunca pode ter dois pacientes;
-  - cancelar uma consulta libera o horário (e o horário deve poder ser reaproveitado pela lista de espera).
-- LGPD: dados de saúde são sensíveis. Guardar o mínimo (sem diagnóstico/prontuário), acesso por perfil. **Usar somente dados fictícios** em desenvolvimento e testes.
+- Interface em **português do Brasil**, letras grandes, alto contraste — público: recepcionistas e idosos.
+- Perfis: `recepcao`, `profissional`, `admin`. **Paciente não tem login**: confirma/cancela por link no e-mail.
+- Regras de negócio: antecedência máxima de 30 dias; um horário nunca com dois pacientes; cancelar libera o horário para a lista de espera.
+- LGPD: guardar o mínimo (sem diagnóstico/prontuário), acesso por perfil e **somente dados fictícios** em dev/testes.
 
-## Fluxo de trabalho esperado
+## Fluxo de trabalho
 
-- Trabalhar em passos pequenos: apresentar o plano da fase e **esperar aprovação** antes de escrever código.
-- Explicar brevemente cada arquivo criado.
-- Commits curtos e objetivos, em português.
+- Uma fase do `PLANO.md` por vez: apresentar o plano e **esperar aprovação** antes de codar.
+- Explicar brevemente cada arquivo criado; commits curtos em português, ao fim de cada fase.
