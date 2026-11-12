@@ -1,4 +1,6 @@
-import { isSupabaseConfigured } from "@/lib/supabase";
+import Link from "next/link";
+
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export default function Home() {
   return (
@@ -26,6 +28,12 @@ export default function Home() {
           Sistema para organizar a agenda do posto, reduzir filas e avisar o
           paciente antes da consulta.
         </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-block rounded-xl bg-sky-900 px-6 py-4 text-xl font-bold text-white hover:bg-sky-800"
+        >
+          Entrar no sistema
+        </Link>
       </section>
 
       <section
