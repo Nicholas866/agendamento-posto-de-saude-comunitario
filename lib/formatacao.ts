@@ -44,3 +44,22 @@ export const NOME_DO_CANAL: Record<string, string> = {
   whatsapp: "WhatsApp",
   sms: "SMS",
 };
+
+const formatadorNumero = new Intl.NumberFormat("pt-BR");
+const formatadorPorcentagem = new Intl.NumberFormat("pt-BR", {
+  maximumFractionDigits: 1,
+});
+
+/** Exibe 1.234. */
+export function formatarNumero(valor: number): string {
+  return formatadorNumero.format(valor);
+}
+
+/** Exibe 20% ou — quando não há base de cálculo. */
+export function formatarPorcentagem(valor: number | null): string {
+  if (valor === null) {
+    return "—";
+  }
+
+  return `${formatadorPorcentagem.format(valor)}%`;
+}

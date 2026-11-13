@@ -86,6 +86,15 @@ export function somarDias(data: string, dias: number): string {
   return resultado.toISOString().slice(0, 10);
 }
 
+/** Segunda-feira (AAAA-MM-DD) da semana de uma data. */
+export function inicioDaSemana(data: string): string {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  const diaDaSemana = new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay();
+  const deslocamento = diaDaSemana === 0 ? 6 : diaDaSemana - 1;
+
+  return somarDias(data, -deslocamento);
+}
+
 /** Data máxima para novos agendamentos: hoje + 30 dias. */
 export function limiteSP(): string {
   return somarDias(hojeSP(), 30);
