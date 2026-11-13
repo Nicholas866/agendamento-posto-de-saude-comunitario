@@ -209,12 +209,12 @@ O sistema **não tem cadastro público de usuários**: as contas são criadas po
 
 Sugestão de roteiro de avaliação, entrando como **recepção**:
 
-1. Cadastrar um paciente em **Pacientes**.
-2. Liberar horários em **Horários**.
-3. Marcar a consulta em **Nova consulta** e conferir na **Agenda**.
+1. Cadastrar um paciente em Pacientes.
+2. Liberar horários em Horários.
+3. Marcar a consulta em Nova consulta e conferir na Agenda.
 4. Cancelar uma consulta futura e ver o horário voltar a ficar livre.
-5. Marcar uma consulta passada como **Faltou** e conferir a taxa no **Painel**.
-6. Entrar como **profissional** e verificar que ele só consulta, sem botões de alteração nem dados de contato.
+5. Marcar uma consulta passada como Faltou e conferir a taxa no Painel.
+6. Entrar como Profissional e verificar que ele só consulta, sem botões de alteração nem dados de contato.
 
 ## Estrutura do projeto
 
