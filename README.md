@@ -1,13 +1,11 @@
-# agendamento-posto-de-saude-comunitario
 # Agenda UBS — Sistema de Agendamento para Posto de Saúde Comunitário
 
 Projeto de Extensão do curso de Ciência da Computação.
-
 **Aluno:** Nicholas Monteiro dos Santos
 
-Sistema web de agendamento de consultas para uma Unidade Básica de Saúde (UBS) ou posto de saúde comunitário. O objetivo é organizar a agenda, reduzir filas e diminuir as faltas dos pacientes, com lembretes automáticos por e-mail (e, futuramente, WhatsApp ou SMS).
+Sistema web de agendamento de consultas para uma Unidade Básica de Saúde (UBS) ou posto de saúde comunitário. O objetivo é organizar a agenda, reduzir filas e dar à equipe um dado concreto sobre as faltas dos pacientes.
 
-> **Status:** em desenvolvimento (projeto acadêmico).
+> **Aviso:** este é um projeto acadêmico. Todos os dados de exemplo (pacientes, CPFs, telefones e e-mails) são **fictícios**.
 
 ---
 
@@ -16,13 +14,17 @@ Sistema web de agendamento de consultas para uma Unidade Básica de Saúde (UBS)
 - [Contexto e justificativa](#contexto-e-justificativa)
 - [Objetivos](#objetivos)
 - [Público-alvo e local](#público-alvo-e-local)
-- [Funcionalidades previstas](#funcionalidades-previstas)
-- [Tecnologias e ferramentas](#tecnologias-e-ferramentas)
-- [Metodologia e cronograma](#metodologia-e-cronograma)
+- [Funcionalidades implementadas](#funcionalidades-implementadas)
+- [Perfis e permissões](#perfis-e-permissões)
+- [Regras de negócio](#regras-de-negócio)
+- [Taxa de faltas](#taxa-de-faltas)
+- [Tecnologias](#tecnologias)
 - [Como rodar o projeto](#como-rodar-o-projeto)
-- [Avaliação e resultados esperados](#avaliação-e-resultados-esperados)
+- [Acesso para avaliação](#acesso-para-avaliação)
+- [Estrutura do projeto](#estrutura-do-projeto)
 - [LGPD e privacidade](#lgpd-e-privacidade)
-- [Fluxo de trabalho no GitHub](#fluxo-de-trabalho-no-github)
+- [Metodologia de desenvolvimento](#metodologia-de-desenvolvimento)
+- [Limitações e trabalhos futuros](#limitações-e-trabalhos-futuros)
 - [Fontes consultadas](#fontes-consultadas)
 
 ---
@@ -37,119 +39,234 @@ As faltas em consultas agendadas são um problema crônico da Atenção Primári
 
 A diferença se explica sobretudo pela **gestão da agenda e pela comunicação**: prazos de agendamento longos, retornos marcados com muita antecedência, cadastros desatualizados e agendamento sem avaliação de risco.
 
-Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com uso muito baixo. A proposta deste projeto **não é substituir o e-SUS**, e sim criar uma ferramenta simples, desenhada com a equipe do posto, que organize a agenda local, confirme presença e avise o paciente antes da consulta.
+Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com uso muito baixo. A proposta deste projeto **não é substituir o e-SUS**, e sim oferecer uma ferramenta simples, desenhada para a rotina da recepção, que organize a agenda local e registre as faltas.
 
 ## Objetivos
 
-**Objetivo geral:** desenvolver e implantar, em um posto de saúde comunitário, um sistema de agendamento de consultas que reduza filas e faltas e facilite o acesso da comunidade ao atendimento.
+**Objetivo geral:** desenvolver um sistema de agendamento de consultas para um posto de saúde comunitário que reduza filas e faltas e facilite o acesso da comunidade ao atendimento.
 
 **Objetivos específicos:**
 
-- Levantar com a equipe do posto (recepção, enfermagem, médicos e agentes comunitários) como a agenda funciona hoje e onde ocorrem filas e faltas.
-- Cadastrar pacientes e profissionais, com telefone e e-mail atualizados.
-- Permitir marcar, remarcar e cancelar consultas, pelo paciente ou pela recepção.
-- Enviar lembretes automáticos pelo menos 24 horas antes da consulta, com opção de confirmar ou cancelar.
+- Cadastrar pacientes e profissionais, com telefone e e-mail.
+- Permitir marcar e cancelar consultas pela recepção.
 - Oferecer um painel simples para a equipe ver a agenda do dia e a taxa de faltas.
-- Tratar os dados de saúde conforme a LGPD, com acesso por perfil e consentimento claro.
-- Capacitar a equipe do posto e entregar um manual de uso.
+- Tratar os dados conforme a LGPD, com acesso por perfil e coleta mínima de dados.
+- Contribuir para a formação em engenharia de requisitos, banco de dados, desenvolvimento web e proteção de dados.
 
 ## Público-alvo e local
 
-- **Público-alvo:** a comunidade atendida pelo posto, em especial pessoas que dependem do SUS para consultas de rotina (hipertensos, diabéticos, gestantes, crianças e idosos). Usuários diretos do sistema: recepção, profissionais de saúde e agentes comunitários.
-- **Local:** UBS ou posto de saúde comunitário do bairro, a definir. _[Preencher: nome do posto, bairro e responsável.]_
-- **Inclusão digital:** parte dos pacientes, sobretudo idosos, pode não ter smartphone. O sistema também deve funcionar pela recepção e por contato telefônico, e não só pelo celular do paciente.
+- **Público-alvo:** a comunidade atendida pelo posto, em especial pessoas que dependem do SUS para consultas de rotina (hipertensos, diabéticos, gestantes, crianças e idosos). Usuários diretos do sistema: recepção, profissionais de saúde e administrador.
+- **Local:** posto de saúde comunitário a definir.
+- **Inclusão digital:** o paciente **não precisa de smartphone nem de login**. Quem opera o sistema é a recepção, que marca e cancela consultas pelo paciente, inclusive por contato telefônico. A interface usa letras grandes e alto contraste, pensando em recepcionistas e idosos.
 
-## Funcionalidades previstas
+## Funcionalidades implementadas
 
-Versão mínima:
+| Área | O que o sistema faz |
+| --- | --- |
+| **Login** | Entrada por e-mail e senha, com perfis (recepção, profissional e administrador) e saída segura. Quem não tem perfil cadastrado não acessa nada. |
+| **Pacientes** | Cadastro, edição e busca por nome, CPF ou Cartão SUS. CPF/Cartão SUS e telefone são guardados só com dígitos e validados no tamanho. |
+| **Profissionais** | Cadastro, edição e ativar/desativar (profissionais nunca são apagados, para preservar o histórico). |
+| **Horários** | Liberação de vários horários de uma vez para um profissional ativo (data, intervalo e duração de 15 a 60 minutos), sem duplicar nem sobrepor, e remoção de horários livres. |
+| **Nova consulta** | Escolha do paciente (com busca), do profissional ativo, do dia e de um horário livre. |
+| **Agenda do dia** | Consultas do dia agrupadas por profissional, com status em **cor e texto**, e navegação entre dias. |
+| **Detalhe da consulta** | Dados da consulta, cancelamento com confirmação (o horário volta a ficar livre) e marcação de **Realizada** ou **Faltou** com opção de desfazer. |
+| **Painel de faltas** | Totais por status, taxa de faltas, gráficos de barras e tabelas por semana e por profissional, com filtro de período. |
 
-1. Login com perfis: recepção, profissional de saúde e administrador.
-2. Cadastro de pacientes (nome, CPF ou Cartão SUS, telefone, e-mail, canal de aviso preferido) e de profissionais.
-3. Agenda por profissional, com horários liberados pela equipe.
-4. Marcação, remarcação e cancelamento de consultas.
-5. Lembrete automático 24 horas antes, com link para confirmar ou cancelar; o horário cancelado volta para a agenda.
-6. Lista de espera: quando um horário é liberado, a recepção vê quem pode ocupá-lo.
-7. Painel com a agenda do dia, consultas confirmadas e taxa de faltas por período.
+## Perfis e permissões
 
-Boas práticas adotadas no desenho do sistema:
+| Ação | Recepção | Profissional | Administrador |
+| --- | :---: | :---: | :---: |
+| Ver agenda, pacientes e detalhe da consulta | sim | sim | sim |
+| Ver CPF/Cartão SUS e telefone do paciente | sim | não | sim |
+| Cadastrar e editar pacientes | sim | não | sim |
+| Liberar horários e marcar/cancelar consultas | sim | não | sim |
+| Marcar Realizada/Faltou e desfazer | sim | não | sim |
+| Cadastrar e editar profissionais | não | não | sim |
+| Ver o painel de faltas | sim | não | sim |
 
-- Limitar a antecedência do agendamento (por exemplo, 30 dias), pois prazos longos aumentam as faltas.
-- Registrar o canal de contato preferido do paciente e atualizar os dados a cada visita.
-- Registrar quem falta repetidamente e avisar o agente comunitário, em vez de apenas bloquear o paciente.
-- Permitir que a recepção marque pelo paciente, para não excluir quem não usa celular.
+A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, **RLS (Row Level Security) no banco**, que é a autoridade final.
 
-## Tecnologias e ferramentas
+## Regras de negócio
+
+Impostas no banco de dados (gatilhos e índices), e não só na tela:
+
+- **Um horário, um paciente:** índice único que ignora consultas canceladas.
+- **Antecedência máxima de 30 dias** para agendar, e nunca no passado.
+- **Cancelar libera o horário** automaticamente para uma nova marcação.
+- **Realizada/Faltou** só podem ser marcadas até o dia da consulta, nunca em datas futuras.
+- **Horários removidos** deixam de aparecer, mas o histórico das consultas é preservado (exclusão lógica).
+- **Profissional desativado** não recebe novos horários, mas suas consultas continuam intactas.
+- Datas e horas sempre exibidas no fuso **America/Sao_Paulo**.
+
+## Taxa de faltas
+
+```
+Taxa de faltas = faltas ÷ consultas vencidas não canceladas × 100
+```
+
+- **Consultas vencidas:** consultas cujo horário já passou, inclusive as que ainda constam como agendadas ou confirmadas (assim uma falta esquecida não some do indicador).
+- Ficam **fora** da conta: consultas canceladas e consultas futuras.
+- Se não houver consultas vencidas no período, o painel mostra "—" em vez de 0%.
+- O painel avisa quando há consultas passadas sem registro, para a equipe atualizar a agenda.
+
+O projeto não promete um percentual de redução de faltas. O valor de comparação é a taxa medida pelo próprio posto antes e depois do uso do sistema.
+
+## Tecnologias
 
 | Finalidade | Ferramenta |
 | --- | --- |
-| Aplicação web | Next.js |
-| Banco de dados e autenticação | Supabase |
-| Editor com apoio de IA | OpenCode |
-| Editor de código | VS Code |
+| Aplicação web | Next.js 16 (App Router), React e TypeScript |
+| Estilo | Tailwind CSS v4 |
+| Banco de dados e autenticação | Supabase (PostgreSQL, Auth e RLS) |
 | Controle de versão | Git e GitHub |
-
-
-## Metodologia e cronograma
-
-Desenvolvimento ágil em ciclos curtos, com entregas pequenas validadas pela equipe do posto. Duração sugerida de 8 semanas, ajustável ao calendário da disciplina.
-
-| Etapa | Semanas | Atividades | Entrega |
-| --- | --- | --- | --- |
-| 1. Imersão e levantamento | 1–2 | Visita ao posto, entrevistas, mapeamento da agenda atual e da taxa de faltas | Relatório de levantamento e requisitos |
-| 2. Projeto | 3 | Casos de uso, modelo de banco de dados, protótipo das telas, plano de LGPD | Protótipo validado |
-| 3. Desenvolvimento | 4–6 | Cadastros, agenda, marcação e cancelamento, lembretes, painel | Versão funcional no GitHub |
-| 4. Testes e ajustes | 7 | Testes com dados fictícios, teste de usabilidade, correções | Versão corrigida |
-| 5. Implantação e capacitação | 8 | Treinamento, manual, uso assistido | Sistema em uso e manual |
-| 6. Avaliação e relatório final | 8 em diante | Questionário de satisfação, comparação da taxa de faltas, relatório | Relatório de extensão |
+| Apoio de IA no desenvolvimento | Cursor e OpenCode |
 
 ## Como rodar o projeto
 
-> Esta seção será completada conforme o código for criado.
+### Pré-requisitos
 
-Pré-requisitos previstos: Node.js (versão LTS), uma conta no Supabase e Git.
+- [Node.js](https://nodejs.org) (versão LTS) e npm
+- [Git](https://git-scm.com)
+- Uma conta gratuita no [Supabase](https://supabase.com)
+
+### 1. Baixar o código
 
 ```bash
-# 1. Clonar o repositório
 git clone https://github.com/Nicholas866/agendamento-posto-de-saude-comunitario.git
 cd agendamento-posto-de-saude-comunitario
-
-# 2. Instalar as dependências
 npm install
+```
 
-# 3. Configurar as variáveis de ambiente
+### 2. Criar o banco no Supabase
+
+1. Crie um projeto novo no Supabase.
+2. Abra **SQL Editor → New query**, cole o conteúdo de `supabase/schema.sql` e clique em **Run**.
+3. Faça o mesmo com `supabase/seed.sql`, que cria dados **fictícios** (5 pacientes, 2 a 3 profissionais, horários e consultas de exemplo).
+
+> Os arquivos `supabase/fase3.sql` e `supabase/fase3b.sql` são correções para bancos criados antes dessas etapas. Em uma instalação nova, o `schema.sql` já inclui tudo.
+
+### 3. Criar os usuários de teste
+
+Em **Authentication → Users → Add user → Create new user**, crie três usuários com **Auto Confirm User** marcado (use e-mails fictícios e uma senha de teste):
+
+- `admin@exemplo.com`
+- `recepcao@exemplo.com`
+- `profissional@exemplo.com`
+
+Depois, no **SQL Editor**, vincule cada usuário a um perfil:
+
+```sql
+insert into public.perfis (id, nome, papel)
+select id, 'Administrador Teste', 'admin' from auth.users where email = 'admin@exemplo.com'
+on conflict (id) do nothing;
+
+insert into public.perfis (id, nome, papel)
+select id, 'Recepção Teste', 'recepcao' from auth.users where email = 'recepcao@exemplo.com'
+on conflict (id) do nothing;
+
+insert into public.perfis (id, nome, papel)
+select id, 'Profissional Teste', 'profissional' from auth.users where email = 'profissional@exemplo.com'
+on conflict (id) do nothing;
+```
+
+### 4. Configurar as variáveis de ambiente
+
+Copie o modelo e preencha com os dados do seu projeto (**Project Settings → API**):
+
+```bash
 cp .env.example .env.local
-# preencher com a URL e a chave do seu projeto Supabase
+```
 
-# 4. Rodar em modo de desenvolvimento
+```
+NEXT_PUBLIC_SUPABASE_URL=url-do-seu-projeto
+NEXT_PUBLIC_SUPABASE_ANON_KEY=chave-anon-ou-publishable
+```
+
+> Use apenas a chave **anon/publishable**. Nunca coloque a chave `service_role` no projeto, e nunca envie o `.env.local` para o GitHub (ele já está no `.gitignore`). No Windows, use `copy .env.example .env.local`.
+
+### 5. Executar
+
+```bash
 npm run dev
 ```
 
-O sistema ficará disponível em `http://localhost:3000`.
+Abra `http://localhost:3000` e entre com um dos usuários criados.
 
-## Avaliação e resultados esperados
+### Outros comandos
 
-- **Taxa de faltas antes e depois:** a equipe do posto informa consultas agendadas e faltas de um período anterior (idealmente 2 a 3 meses) para comparar com o período de uso. Taxa de faltas = faltas ÷ consultas agendadas × 100.
-- **Uso do sistema:** consultas marcadas, confirmadas, canceladas e remarcadas, e horários cancelados que foram reaproveitados.
-- **Satisfação:** questionário curto com a recepção, os profissionais e uma amostra de pacientes.
-- **Relatórios dos alunos:** registro semanal do progresso e das dificuldades.
+```bash
+npm run lint    # verifica o código
+npm run build   # gera a versão de produção
+npm run start   # executa a versão de produção (após o build)
+```
 
-O projeto não promete um percentual de redução de faltas antes de medir a situação inicial do posto.
+## Acesso para avaliação
+
+O sistema **não tem cadastro público de usuários**: as contas são criadas por quem administra o banco, como acontece em um posto real. Para avaliar o projeto existem duas formas:
+
+1. **Usar a versão já configurada:** os dados de acesso dos usuários de demonstração (administrador, recepção e profissional) são informados junto com a entrega do trabalho, não neste repositório.
+2. **Rodar do zero:** seguir a seção [Como rodar o projeto](#como-rodar-o-projeto), que cria um banco próprio com dados fictícios em poucos minutos.
+
+Sugestão de roteiro de avaliação, entrando como **recepção**:
+
+1. Cadastrar um paciente em **Pacientes**.
+2. Liberar horários em **Horários**.
+3. Marcar a consulta em **Nova consulta** e conferir na **Agenda**.
+4. Cancelar uma consulta futura e ver o horário voltar a ficar livre.
+5. Marcar uma consulta passada como **Faltou** e conferir a taxa no **Painel**.
+6. Entrar como **profissional** e verificar que ele só consulta, sem botões de alteração nem dados de contato.
+
+## Estrutura do projeto
+
+```
+app/
+  login/                 tela de login
+  (sistema)/             área protegida (agenda, pacientes, profissionais,
+                         horários, consultas e painel)
+components/              componentes reutilizáveis (formulários, status, gráficos)
+lib/                     autenticação, validação, formatação, datas e acesso a dados
+  supabase/              clientes do Supabase (navegador e servidor)
+supabase/
+  schema.sql             tabelas, regras, gatilhos e RLS
+  seed.sql               dados fictícios de exemplo
+  fase3.sql, fase3b.sql  correções para bancos já existentes
+proxy.ts                 renovação de sessão e redirecionamento para o login
+AGENTS.md                regras e convenções do projeto
+PLANO.md                 roteiro de desenvolvimento por fases
+```
 
 ## LGPD e privacidade
 
-- Dados de saúde são dados pessoais sensíveis. A base legal mais usada no atendimento é a tutela da saúde (art. 11, II, "f", da Lei nº 13.709/2018); quando o consentimento for a base, ele deve ser específico e destacado.
-- **Coleta mínima:** o agendamento não guarda diagnóstico nem prontuário.
-- Acesso por perfil, senhas seguras, criptografia em trânsito e registros de acesso.
-- **Durante o desenvolvimento e os testes, usar apenas dados fictícios.**
-- Definir um responsável por responder pedidos dos titulares e um plano para incidentes de segurança.
+- Dados de saúde são dados pessoais sensíveis. A base legal mais usada no atendimento é a tutela da saúde (art. 11, II, "f", da Lei nº 13.709/2018); o texto da lei deve ser conferido com o professor.
+- **Coleta mínima:** o sistema não guarda diagnóstico, prontuário nem observações clínicas.
+- **Acesso por perfil:** o profissional não vê CPF, telefone nem e-mail do paciente; as regras são aplicadas no banco (RLS).
+- O painel de faltas usa apenas números e nomes de profissionais, sem dados de pacientes.
+- Nenhum dado pessoal é registrado em logs.
+- **Em desenvolvimento e testes, apenas dados fictícios.**
+- Para uma implantação real, ainda seriam necessários: responsável pelo atendimento a pedidos dos titulares, plano de resposta a incidentes e termo de consentimento quando essa for a base legal.
 
-## Fluxo de trabalho no GitHub
+## Metodologia de desenvolvimento
 
-- Branch principal: `main` (sempre estável).
-- Novas funcionalidades em branches próprias (ex.: `feature/agenda`, `feature/lembretes`).
-- Alterações entram na `main` por pull request.
-- Tarefas organizadas em issues.
-- Mensagens de commit curtas e objetivas, em português.
+O projeto foi desenvolvido em fases curtas, com entrega testada manualmente ao final de cada uma:
+
+1. **Estrutura:** projeto Next.js, Tailwind e conexão com o Supabase.
+2. **Banco e login:** tabelas, regras no banco, RLS e login por perfil.
+3. **Cadastros:** pacientes e profissionais.
+4. **Agenda:** horários, nova consulta, agenda do dia, cancelamento e registro de presença.
+5. **Painel de faltas:** totais, taxa e gráficos.
+
+O código foi escrito com apoio de ferramentas de IA (Cursor e OpenCode) e é revisado e testado manualmente a cada fase, com commits curtos em português no GitHub.
+
+## Limitações e trabalhos futuros
+
+Ficaram fora desta versão:
+
+- **Remarcar consulta** (hoje, cancela-se e agenda-se de novo).
+- **Lembrete automático por e-mail, WhatsApp ou SMS** e **confirmação pelo paciente por link**. O banco já tem as funções preparadas para o link (`consulta_por_token` e `responder_consulta`), mas a página pública e o envio ainda não foram feitos.
+- **Lista de espera** para horários liberados.
+- **Histórico de alterações** de cada consulta.
+- Vínculo entre o usuário profissional e o seu cadastro de profissional, para filtrar a agenda pessoal.
+- Implantação real em um posto e medição da taxa de faltas antes e depois do uso.
 
 ## Fontes consultadas
 
