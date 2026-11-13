@@ -1,19 +1,18 @@
 # AGENTS.md
 
-Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde comunitário. Requisitos em `README.md`; roteiro de fases em `PLANO.md`. Leia os dois antes de planejar.
+Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde comunitário. O estado real está em `README.md`; `PLANO.md` é o roteiro histórico de planejamento das fases. Leia o README antes de planejar.
 
 ## Comandos
 
-- O Node **não está no PATH** do shell do agente. Use `C:\Program Files\nodejs\npm.cmd` (o PowerShell bloqueia `npm.ps1` por ExecutionPolicy) ou rode `$env:PATH = "C:\Program Files\nodejs;" + $env:PATH` antes.
-- `npm run dev` · `npm run build` · `npm run lint` · `npm start`.
+- `npm run dev` · `npm run build` · `npm run lint` · `npm start`. Se o Node não estiver no PATH do shell, ajuste-o para a instalação local antes de rodar.
 - Não há suíte de testes configurada.
 
 ## Stack e estrutura
 
 - Next.js 16 (App Router, Turbopack, Cache Components), React 19, TypeScript, Tailwind CSS v4 via `@tailwindcss/turbopack`.
 - Tailwind v4: **não existe** `tailwind.config.*`; estilos e tokens ficam em `app/globals.css` (`@theme inline`).
-- Rotas em `app/`: `/` (landing), `/login` e `app/(sistema)/` com `/agenda` e `/painel` protegidas.
-- Supabase: `lib/supabase/config.ts` (env + `isSupabaseConfigured`), `client.ts` (navegador) e `server.ts` (cookies). `lib/auth.ts` é a DAL (`getPerfilAtual`, `exigirPerfil`, `exigirPapel`, `rotaInicial`).
+- Rotas em `app/`: `/` (landing) e `/login` são públicas. Todo o `app/(sistema)/` é protegido: `agenda`, `pacientes` (lista, novo e editar), `profissionais` (lista, novo e editar), `horarios`, `consultas/nova`, `consultas/[id]` e `painel`.
+- Supabase: `lib/supabase/config.ts` (env + `isSupabaseConfigured`) e `server.ts` (cookies). `lib/auth.ts` é a DAL (`getPerfilAtual`, `exigirPerfil`, `exigirPapel`, `rotaInicial`).
 - Next 16: o antigo `middleware.ts` agora é `proxy.ts` (na raiz). Ele só renova a sessão e faz redirect otimista; a autorização real fica no layout/DAL, nas Server Actions e no RLS.
 - Cache Components está ligado: página/layout que lê cookies precisa de `export const instant = false` (ou `<Suspense>`), senão o build falha.
 - Fonte do sistema (sem `next/font/google`) para o build funcionar offline e manter leitura simples.
@@ -22,24 +21,24 @@ Projeto acadêmico "Agenda UBS": agendamento de consultas para posto de saúde c
 ## Ambiente
 
 - `.env.local` (ignorado pelo Git) recebe `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`; `.env.example` é versionado com valores vazios.
-- Nunca commitar chaves. A página inicial só indica se o Supabase está configurado; não inventar credenciais.
-- `supabase/schema.sql` e `supabase/seed.sql` são aplicados **manualmente** no SQL Editor do Supabase; o agente não tem como aplicá-los.
+- Nunca commitar chaves. A página inicial não expõe status de infraestrutura; não inventar credenciais.
+- `supabase/schema.sql` e `supabase/seed.sql` são aplicados **manualmente** no SQL Editor do Supabase; o agente não tem como aplicá-los. `supabase/fase3.sql` e `supabase/fase3b.sql` são correções para bancos criados antes dessas etapas.
 - Usuário autenticado sem linha em `perfis` é deslogado e volta a `/login?erro=sem-perfil`.
 - O seed é 100% fictício e desabilita `validar_agendamento` apenas durante o script, para inserir consultas passadas (`faltou`/`realizada`).
 
 ## Convenções do produto
 
 - Interface em **português do Brasil**, letras grandes, alto contraste — público: recepcionistas e idosos.
-- Perfis: `recepcao`, `profissional`, `admin`. **Paciente não tem login**: confirma/cancela por link no e-mail.
-- Regras de negócio: antecedência máxima de 30 dias; um horário nunca com dois pacientes; cancelar libera o horário para a lista de espera.
+- Perfis: `recepcao`, `profissional`, `admin`. **Paciente não tem login**. A confirmação/cancelamento por link no e-mail ainda **não** foi implementada.
+- Regras de negócio: antecedência máxima de 30 dias; um horário nunca com dois pacientes; cancelar libera o horário. A lista de espera ainda **não** foi implementada.
 - CPF/Cartão SUS e telefone são gravados **somente com dígitos** (normalização em `lib/validacao.ts`); a exibição formatada fica em `lib/formatacao.ts`.
-- Profissionais nunca são apagados: `ativo = false` só os remove de novos horários (Fase 3). Consultas existentes continuam válidas.
+- Profissionais nunca são apagados: `ativo = false` só os remove de novos horários. Consultas existentes continuam válidas.
 - Nunca logar nome, CPF, telefone ou e-mail de paciente. Erros do banco são traduzidos em `lib/erros.ts` usando apenas o código do Postgres.
 - LGPD: guardar o mínimo (sem diagnóstico/prontuário), acesso por perfil e **somente dados fictícios** em dev/testes.
 
 ## Fluxo de trabalho
 
-- Uma fase do `PLANO.md` por vez: apresentar o plano e **esperar aprovação** antes de codar.
+- Use `README.md` como estado real e `PLANO.md` como histórico de planejamento. Apresente o plano e **espere aprovação** antes de codar.
 - Explicar brevemente cada arquivo criado; commits curtos em português, ao fim de cada fase.
 
 <!-- BEGIN:nextjs-agent-rules -->

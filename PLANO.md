@@ -1,5 +1,7 @@
 # Plano de Desenvolvimento — Agenda UBS
 
+> **Documento histórico de planejamento.** O estado real do projeto, as funcionalidades implementadas e as limitações atuais estão no [README.md](README.md). Algumas ideias abaixo (link por e-mail e lista de espera, por exemplo) ainda não foram implementadas.
+
 Guia para conduzir o OpenCode no projeto. Cole a seção "Prompt de contexto" primeiro; depois siga as fases uma de cada vez.
 
 > **Prazo:** o PDF da disciplina indica 15/11/2026 como prazo, com 27/11 como limite máximo. Hoje é 11/11, então este plano é uma **versão enxuta (MVP)**. Confirme com a professora qual data vale.
