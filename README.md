@@ -209,6 +209,8 @@ npm run start   # executa a versão de produção (após o build)
 
 ## Acesso para avaliação
 
+Sistema online: https://agendamento-posto-de-saude-comunita.vercel.app
+
 O sistema **não tem cadastro público de usuários**: as contas são criadas por quem administra o banco, como acontece em um posto real. Para avaliar o projeto existem duas formas:
 
 1. **Usar a versão já configurada:** os dados de acesso dos usuários de demonstração (administrador, recepção e profissional) são informados junto com a entrega do trabalho, não neste repositório.
