@@ -1,11 +1,11 @@
 # Agenda UBS — Sistema de Agendamento para Posto de Saúde Comunitário
 
 Projeto de Extensão do curso de Ciência da Computação.
-**Aluno:** Nicholas Monteiro dos Santos
+Aluno: Nicholas Monteiro dos Santos
 
 Sistema web de agendamento de consultas para uma Unidade Básica de Saúde (UBS) ou posto de saúde comunitário. O objetivo é organizar a agenda, reduzir filas e dar à equipe um dado concreto sobre as faltas dos pacientes.
 
-> **Aviso:** este é um projeto acadêmico. Todos os dados de exemplo (pacientes, CPFs, telefones e e-mails) são **fictícios**.
+> **Aviso:** este é um projeto acadêmico. Todos os dados de exemplo (pacientes, CPFs, telefones e e-mails) são fictícios.
 
 ---
 
