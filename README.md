@@ -86,7 +86,6 @@ Boas práticas adotadas no desenho do sistema:
 | Banco de dados e autenticação | Supabase |
 | Editor com apoio de IA | OpenCode |
 | Editor de código | VS Code |
-| Protótipos das telas | Figma |
 | Controle de versão | Git e GitHub |
 
 
@@ -97,7 +96,7 @@ Desenvolvimento ágil em ciclos curtos, com entregas pequenas validadas pela equ
 | Etapa | Semanas | Atividades | Entrega |
 | --- | --- | --- | --- |
 | 1. Imersão e levantamento | 1–2 | Visita ao posto, entrevistas, mapeamento da agenda atual e da taxa de faltas | Relatório de levantamento e requisitos |
-| 2. Projeto | 3 | Casos de uso, modelo de banco de dados, protótipo das telas, plano de LGPD | Protótipo validado com a equipe |
+| 2. Projeto | 3 | Casos de uso, modelo de banco de dados, protótipo das telas, plano de LGPD | Protótipo validado |
 | 3. Desenvolvimento | 4–6 | Cadastros, agenda, marcação e cancelamento, lembretes, painel | Versão funcional no GitHub |
 | 4. Testes e ajustes | 7 | Testes com dados fictícios, teste de usabilidade, correções | Versão corrigida |
 | 5. Implantação e capacitação | 8 | Treinamento, manual, uso assistido | Sistema em uso e manual |
