@@ -288,7 +288,7 @@ create policy perfis_delete on public.perfis
 drop policy if exists pacientes_select on public.pacientes;
 create policy pacientes_select on public.pacientes
   for select to authenticated
-  using (true);
+  using (public.papel_atual() is not null);
 
 drop policy if exists pacientes_insert on public.pacientes;
 create policy pacientes_insert on public.pacientes
@@ -310,7 +310,7 @@ create policy pacientes_delete on public.pacientes
 drop policy if exists profissionais_select on public.profissionais;
 create policy profissionais_select on public.profissionais
   for select to authenticated
-  using (true);
+  using (public.papel_atual() is not null);
 
 drop policy if exists profissionais_insert on public.profissionais;
 create policy profissionais_insert on public.profissionais
@@ -332,7 +332,7 @@ create policy profissionais_delete on public.profissionais
 drop policy if exists horarios_select on public.horarios;
 create policy horarios_select on public.horarios
   for select to authenticated
-  using (true);
+  using (public.papel_atual() is not null);
 
 drop policy if exists horarios_insert on public.horarios;
 create policy horarios_insert on public.horarios
@@ -354,7 +354,7 @@ create policy horarios_delete on public.horarios
 drop policy if exists consultas_select on public.consultas;
 create policy consultas_select on public.consultas
   for select to authenticated
-  using (true);
+  using (public.papel_atual() is not null);
 
 drop policy if exists consultas_insert on public.consultas;
 create policy consultas_insert on public.consultas

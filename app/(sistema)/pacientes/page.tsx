@@ -25,6 +25,7 @@ export default async function PacientesPage({
   const termo = typeof q === "string" ? q : "";
   const pacientes = await listarPacientes(termo);
   const podeEditar = perfil.papel === "recepcao" || perfil.papel === "admin";
+  const podeVerContato = podeEditar;
   const mensagem = sucesso ? MENSAGENS_SUCESSO[sucesso] : undefined;
 
   return (
@@ -33,7 +34,9 @@ export default async function PacientesPage({
         <div>
           <h1 className="text-4xl font-bold text-gray-900">Pacientes</h1>
           <p className="mt-2 text-xl text-gray-700">
-            Busque por nome, CPF ou Cartão SUS.
+            {podeVerContato
+              ? "Busque por nome, CPF ou Cartão SUS."
+              : "Busque pelo nome do paciente."}
           </p>
         </div>
 
@@ -63,7 +66,9 @@ export default async function PacientesPage({
             name="q"
             type="search"
             defaultValue={termo}
-            placeholder="Nome, CPF ou Cartão SUS"
+            placeholder={
+              podeVerContato ? "Nome, CPF ou Cartão SUS" : "Nome do paciente"
+            }
             className="w-full rounded-xl border-2 border-gray-400 bg-white px-4 py-3 text-xl text-gray-900 focus:border-sky-800"
           />
           <button
@@ -100,31 +105,38 @@ export default async function PacientesPage({
                 {paciente.nome}
               </h2>
 
-              <dl className="mt-3 space-y-1 text-lg text-gray-800">
-                <div>
-                  <dt className="inline font-semibold">CPF/Cartão SUS: </dt>
-                  <dd className="inline">
-                    {formatarCpfOuCartao(paciente.cpf_ou_cartao_sus)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="inline font-semibold">Telefone: </dt>
-                  <dd className="inline">
-                    {formatarTelefone(paciente.telefone)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="inline font-semibold">E-mail: </dt>
-                  <dd className="inline">{paciente.email ?? "não informado"}</dd>
-                </div>
-                <div>
-                  <dt className="inline font-semibold">Aviso preferido: </dt>
-                  <dd className="inline">
-                    {NOME_DO_CANAL[paciente.canal_preferido] ??
-                      paciente.canal_preferido}
-                  </dd>
-                </div>
-              </dl>
+              {podeVerContato ? (
+                <dl className="mt-3 space-y-1 text-lg text-gray-800">
+                  <div>
+                    <dt className="inline font-semibold">CPF/Cartão SUS: </dt>
+                    <dd className="inline">
+                      {formatarCpfOuCartao(paciente.cpf_ou_cartao_sus)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="inline font-semibold">Telefone: </dt>
+                    <dd className="inline">
+                      {formatarTelefone(paciente.telefone)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="inline font-semibold">E-mail: </dt>
+                    <dd className="inline">{paciente.email ?? "não informado"}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline font-semibold">Aviso preferido: </dt>
+                    <dd className="inline">
+                      {NOME_DO_CANAL[paciente.canal_preferido] ??
+                        paciente.canal_preferido}
+                    </dd>
+                  </div>
+                </dl>
+              ) : (
+                <p className="mt-3 text-base text-gray-600">
+                  Os dados de contato ficam visíveis apenas para a recepção e a
+                  administração.
+                </p>
+              )}
 
               {podeEditar ? (
                 <Link

@@ -88,13 +88,18 @@ A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do
 
 ## Regras de negócio
 
-Impostas no banco de dados (gatilhos e índices), e não só na tela:
+### No banco de dados
+
+Impostas por gatilhos e índices, e não só na tela:
 
 - Um horário, um paciente: índice único que ignora consultas canceladas.
 - Antecedência máxima de 30 dias para agendar, e nunca no passado.
 - Cancelar libera o horário automaticamente para uma nova marcação.
-- Realizada/Faltou só podem ser marcadas até o dia da consulta, nunca em datas futuras.
 - Horários removidos deixam de aparecer, mas o histórico das consultas é preservado (exclusão lógica).
+
+### Na aplicação
+
+- Realizada/Faltou só podem ser marcadas até o dia da consulta, nunca em datas futuras.
 - Profissional desativado não recebe novos horários, mas suas consultas continuam intactas.
 - Datas e horas sempre exibidas no fuso de Brasília.
 
@@ -125,7 +130,7 @@ O projeto não promete um percentual de redução de faltas. O valor de compara�
 
 ### Pré-requisitos
 
-- [Node.js](https://nodejs.org) (versão LTS) e npm
+- [Node.js](https://nodejs.org) 20.9 ou mais novo e npm
 - [Git](https://git-scm.com)
 - Uma conta gratuita no [Supabase](https://supabase.com)
 
@@ -141,11 +146,13 @@ npm install
 
 1. Crie um projeto novo no Supabase.
 2. Abra **SQL Editor → New query**, cole o conteúdo de `supabase/schema.sql` e clique em **Run**.
-3. Faça o mesmo com `supabase/seed.sql`, que cria dados **fictícios** (5 pacientes, 2 a 3 profissionais, horários e consultas de exemplo).
+3. Faça o mesmo com `supabase/seed.sql`, que cria dados **fictícios** (5 pacientes, 2 profissionais, horários e consultas de exemplo).
 
 > Os arquivos `supabase/fase3.sql` e `supabase/fase3b.sql` são correções para bancos criados antes dessas etapas. Em uma instalação nova, o `schema.sql` já inclui tudo.
 
 ### 3. Criar os usuários de teste
+
+Antes de criar as contas, desative a opção **Allow new users to sign up** no Supabase Auth.
 
 Em **Authentication → Users → Add user → Create new user**, crie três usuários com **Auto Confirm User** marcado (use e-mails fictícios e uma senha de teste):
 
@@ -239,7 +246,7 @@ PLANO.md                 roteiro de desenvolvimento por fases
 
 - Dados de saúde são dados pessoais sensíveis. A base legal mais usada no atendimento é a tutela da saúde (art. 11, II, "f", da Lei nº 13.709/2018); o texto da lei deve ser conferido com o professor.
 - **Coleta mínima:** o sistema não guarda diagnóstico, prontuário nem observações clínicas.
-- **Acesso por perfil:** o profissional não vê CPF, telefone nem e-mail do paciente; as regras são aplicadas no banco (RLS).
+- **Acesso por perfil:** a interface do profissional não mostra CPF, telefone nem e-mail do paciente. A restrição por coluna no banco ficou como trabalho futuro; hoje o RLS limita o acesso às linhas, não às colunas.
 - O painel de faltas usa apenas números e nomes de profissionais, sem dados de pacientes.
 - Nenhum dado pessoal é registrado em logs.
 - **Em desenvolvimento e testes, apenas dados fictícios.**
