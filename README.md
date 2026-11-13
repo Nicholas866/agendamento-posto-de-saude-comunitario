@@ -37,9 +37,9 @@ As faltas em consultas agendadas são um problema crônico da Atenção Primári
 - Os números variam muito por unidade: de 11,8% a 13,5% em UBS do Espírito Santo e 48,9% em uma UBS da periferia do Rio de Janeiro (Cabezas Rio Frio, 2020).
 - Em São José dos Campos, o primeiro trimestre de 2022 teve 15,77% de faltas (26.985 de 171.135 consultas).
 
-A diferença se explica sobretudo pela **gestão da agenda e pela comunicação**: prazos de agendamento longos, retornos marcados com muita antecedência, cadastros desatualizados e agendamento sem avaliação de risco.
+A diferença se explica sobretudo pela gestão da agenda e pela comunicação: prazos de agendamento longos, retornos marcados com muita antecedência, cadastros desatualizados e agendamento sem avaliação de risco.
 
-Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com uso muito baixo. A proposta deste projeto **não é substituir o e-SUS**, e sim oferecer uma ferramenta simples, desenhada para a rotina da recepção, que organize a agenda local e registre as faltas.
+Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com uso muito baixo. A proposta deste projeto não é substituir o e-SUS, e sim oferecer uma ferramenta simples, desenhada para a rotina da recepção, que organize a agenda local e registre as faltas.
 
 ## Objetivos
 
@@ -56,8 +56,8 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 ## Público-alvo e local
 
 - **Público-alvo:** a comunidade atendida pelo posto, em especial pessoas que dependem do SUS para consultas de rotina (hipertensos, diabéticos, gestantes, crianças e idosos). Usuários diretos do sistema: recepção, profissionais de saúde e administrador.
-- **Local:** posto de saúde comunitário a definir.
-- **Inclusão digital:** o paciente **não precisa de smartphone nem de login**. Quem opera o sistema é a recepção, que marca e cancela consultas pelo paciente, inclusive por contato telefônico. A interface usa letras grandes e alto contraste, pensando em recepcionistas e idosos.
+- Local: posto de saúde comunitário a definir.
+- Inclusão digital: o paciente não precisa de smartphone nem de login. Quem opera o sistema é a recepção, que marca e cancela consultas pelo paciente, inclusive por contato telefônico. A interface usa letras grandes e alto contraste, pensando em recepcionistas e idosos.
 
 ## Funcionalidades implementadas
 
@@ -84,19 +84,19 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | Cadastrar e editar profissionais | não | não | sim |
 | Ver o painel de faltas | sim | não | sim |
 
-A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, **RLS (Row Level Security) no banco**, que é a autoridade final.
+A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, RLS (Row Level Security) no banco, que é a autoridade final.
 
 ## Regras de negócio
 
 Impostas no banco de dados (gatilhos e índices), e não só na tela:
 
-- **Um horário, um paciente:** índice único que ignora consultas canceladas.
-- **Antecedência máxima de 30 dias** para agendar, e nunca no passado.
-- **Cancelar libera o horário** automaticamente para uma nova marcação.
-- **Realizada/Faltou** só podem ser marcadas até o dia da consulta, nunca em datas futuras.
-- **Horários removidos** deixam de aparecer, mas o histórico das consultas é preservado (exclusão lógica).
-- **Profissional desativado** não recebe novos horários, mas suas consultas continuam intactas.
-- Datas e horas sempre exibidas no fuso **America/Sao_Paulo**.
+- Um horário, um paciente: índice único que ignora consultas canceladas.
+- Antecedência máxima de 30 dias para agendar, e nunca no passado.
+- Cancelar libera o horário automaticamente para uma nova marcação.
+- Realizada/Faltou só podem ser marcadas até o dia da consulta, nunca em datas futuras.
+- Horários removidos deixam de aparecer, mas o histórico das consultas é preservado (exclusão lógica).
+- Profissional desativado não recebe novos horários, mas suas consultas continuam intactas.
+- Datas e horas sempre exibidas no fuso de Brasília.
 
 ## Taxa de faltas
 
@@ -104,8 +104,8 @@ Impostas no banco de dados (gatilhos e índices), e não só na tela:
 Taxa de faltas = faltas ÷ consultas vencidas não canceladas × 100
 ```
 
-- **Consultas vencidas:** consultas cujo horário já passou, inclusive as que ainda constam como agendadas ou confirmadas (assim uma falta esquecida não some do indicador).
-- Ficam **fora** da conta: consultas canceladas e consultas futuras.
+- Consultas vencidas: consultas cujo horário já passou, inclusive as que ainda constam como agendadas ou confirmadas (assim uma falta esquecida não some do indicador).
+- Ficam fora da conta: consultas canceladas e consultas futuras.
 - Se não houver consultas vencidas no período, o painel mostra "—" em vez de 0%.
 - O painel avisa quando há consultas passadas sem registro, para a equipe atualizar a agenda.
 
