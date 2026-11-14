@@ -37,7 +37,7 @@ Recepção cadastra paciente  ──►  libera horários do profissional
 | 10 | Confirmar / cancelar (pública) | paciente | página aberta pelo link do e-mail, sem login |
 | 11 | Lista de espera (opcional) | recepção | quem aguarda vaga; aparece quando um horário é liberado |
 
-Desenhe as telas 2, 4, 7 e 9 no Figma antes de pedir o código (mesmo que seja um rascunho simples).
+Desenhe as telas 2, 4, 7 e 9.
 
 ## 3. Modelo de dados (resumo)
 
