@@ -69,12 +69,10 @@ local está no .gitignore. Crie uma página inicial simples.
 - Telas 3, 4 e 5: pacientes e profissionais (criar, editar, buscar).
 - **Pronto quando:** cadastro 5 pacientes e 2 profissionais fictícios.
 
-
 ### Fase 3 — Horários e agenda (≈ 4 horas) — núcleo do sistema
 - Telas 6, 7, 8 e 2: liberar horários, marcar, remarcar, cancelar, agenda do dia.
 - Regras: máximo 30 dias; sem horário duplicado; cancelar libera o horário.
 - **Pronto quando:** marco, remarco e cancelo uma consulta e o horário volta a ficar livre.
-
 
 ### Fase 4 — Lembretes e confirmação (≈ 3 horas)
 - Rotina diária que envia e-mail 24h antes com links de confirmar e cancelar.
@@ -95,7 +93,6 @@ local está no .gitignore. Crie uma página inicial simples.
 - **Pronto quando:** outra pessoa consegue clonar, rodar e fazer uma marcação seguindo o README.
 
 
----
 
 ## 5. Se o tempo apertar (ordem de corte)
 
