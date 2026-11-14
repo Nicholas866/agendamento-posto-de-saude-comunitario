@@ -14,7 +14,7 @@ export type DadosProfissional = {
   especialidade: string;
 };
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CANAIS: CanalPreferido[] = ["email", "whatsapp", "sms"];
 
 /**

@@ -10,6 +10,7 @@ const ROTAS_PROTEGIDAS = [
   "/profissionais",
   "/horarios",
   "/consultas",
+  "/usuarios",
 ];
 
 function rotaProtegida(pathname: string) {

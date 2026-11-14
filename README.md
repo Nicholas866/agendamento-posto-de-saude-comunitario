@@ -71,6 +71,7 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | **Agenda do dia** | Consultas do dia agrupadas por profissional, com status em **cor e texto**, e navegação entre dias. |
 | **Detalhe da consulta** | Dados da consulta, cancelamento com confirmação (o horário volta a ficar livre) e marcação de **Realizada** ou **Faltou** com opção de desfazer. |
 | **Painel de faltas** | Totais por status, taxa de faltas, gráficos de barras e tabelas por semana e por profissional, com filtro de período. |
+| **Usuários** | Exclusiva do administrador: lista as contas (nome, papel e e-mail) e cria novos acessos no Supabase Auth já confirmados, com o perfil correspondente. |
 
 ## Perfis e permissões
 
@@ -83,6 +84,7 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | Marcar Realizada/Faltou e desfazer | sim | não | sim |
 | Cadastrar e editar profissionais | não | não | sim |
 | Ver o painel de faltas | sim | não | sim |
+| Criar contas de usuário (nome, e-mail, senha e papel) | não | não | sim |
 
 A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, RLS (Row Level Security) no banco, que é a autoridade final.
 
@@ -187,9 +189,10 @@ cp .env.example .env.local
 ```
 NEXT_PUBLIC_SUPABASE_URL=url-do-seu-projeto
 NEXT_PUBLIC_SUPABASE_ANON_KEY=chave-anon-ou-publishable
+SUPABASE_SERVICE_ROLE_KEY=chave-service-role
 ```
 
-> Use apenas a chave **anon/publishable**. Nunca coloque a chave `service_role` no projeto, e nunca envie o `.env.local` para o GitHub (ele já está no `.gitignore`). No Windows, use `copy .env.example .env.local`.
+> A chave **anon/publishable** é pública e pode ir para o navegador. Já a `SUPABASE_SERVICE_ROLE_KEY` dá acesso total ao banco: ela é usada **somente no servidor** (tela de Usuários, que cria contas no Auth), **nunca** leva o prefixo `NEXT_PUBLIC_` e **nunca** deve ser commitada. O `.env.local` já está no `.gitignore`; não envie esse arquivo para o GitHub. No Windows, use `copy .env.example .env.local`.
 
 ### 5. Executar
 
@@ -211,7 +214,7 @@ npm run start   # executa a versão de produção (após o build)
 
 Sistema online: https://agendamento-posto-de-saude-comunita.vercel.app
 
-O sistema **não tem cadastro público de usuários**: as contas são criadas por quem administra o banco, como acontece em um posto real. Para avaliar o projeto existem duas formas:
+O sistema **não tem cadastro público de usuários**: o administrador cria as contas pela tela **Usuários**, como acontece em um posto real. Para avaliar o projeto existem duas formas:
 
 1. **Usar a versão já configurada:** os dados de acesso dos usuários de demonstração (administrador, recepção e profissional) são informados junto com a entrega do trabalho, não neste repositório.
 2. **Rodar do zero:** seguir a seção [Como rodar o projeto](#como-rodar-o-projeto), que cria um banco próprio com dados fictícios em poucos minutos.
@@ -231,10 +234,10 @@ Sugestão de roteiro de avaliação, entrando como **recepção**:
 app/
   login/                 tela de login
   (sistema)/             área protegida (agenda, pacientes, profissionais,
-                         horários, consultas e painel)
+                         horários, consultas, painel e usuários)
 components/              componentes reutilizáveis (formulários, status, gráficos)
 lib/                     autenticação, validação, formatação, datas e acesso a dados
-  supabase/              clientes do Supabase (navegador e servidor)
+  supabase/              clientes do Supabase (servidor e administrativo)
 supabase/
   schema.sql             tabelas, regras, gatilhos e RLS
   seed.sql               dados fictícios de exemplo

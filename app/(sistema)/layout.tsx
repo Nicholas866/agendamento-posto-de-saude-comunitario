@@ -99,6 +99,14 @@ export default async function SistemaLayout({
               Painel
             </Link>
           ) : null}
+          {perfil.papel === "admin" ? (
+            <Link
+              href="/usuarios"
+              className="rounded-lg px-4 py-2 text-lg font-semibold text-sky-900 hover:bg-sky-50"
+            >
+              Usuários
+            </Link>
+          ) : null}
         </nav>
       </header>
 
