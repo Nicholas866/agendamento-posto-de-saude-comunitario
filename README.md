@@ -138,6 +138,7 @@ O projeto não promete um percentual de redução de faltas. O valor de compara�
 - [Node.js](https://nodejs.org) 20.9 ou mais novo e npm
 - [Git](https://git-scm.com)
 - Uma conta gratuita no [Supabase](https://supabase.com)
+- Uma conta gratuita no [Vercel](https://vercel.com/))
 
 ### 1. Baixar o código
 
