@@ -73,7 +73,7 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | **Painel de faltas** | Totais por status, taxa de faltas, gráficos de barras e tabelas por semana e por profissional, com filtro de período. |
 | **Usuários** | Exclusiva do administrador: lista as contas (nome, papel e e-mail) e cria novos acessos no Supabase Auth já confirmados, com o perfil correspondente. |
 
-##Perfisepermissões
+## Perfisepermissões
 
 | Ação | Recepção | Profissional | Administrador |
 | --- | :---: | :---: | :---: |
