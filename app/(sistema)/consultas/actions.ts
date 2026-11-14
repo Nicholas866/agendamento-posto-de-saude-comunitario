@@ -12,7 +12,7 @@ import { buscarConsultaParaAcao } from "@/lib/dados/consultas";
 import { buscarHorario } from "@/lib/dados/horarios";
 import { buscarPaciente } from "@/lib/dados/pacientes";
 import { exigirPapel } from "@/lib/auth";
-import { mensagemDeErroBanco } from "@/lib/erros";
+import { chaveErroCancelamento, mensagemDeErroBanco } from "@/lib/erros";
 import { createClient } from "@/lib/supabase/server";
 import { UUID_REGEX, type AcaoFormulario } from "@/lib/tipos";
 import { validarNovaConsulta } from "@/lib/validacao-agenda";
@@ -154,7 +154,7 @@ function destinoErro(
 }
 
 export async function cancelarConsulta(formData: FormData) {
-  await exigirPapel("recepcao", "admin");
+  await exigirPapel("recepcao", "profissional", "admin");
 
   const id = String(formData.get("id") ?? "");
   const retorno = normalizarRetorno(formData.get("retorno"));
@@ -180,19 +180,12 @@ export async function cancelarConsulta(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { data: atualizadas, error } = await supabase
-    .from("consultas")
-    .update({ status: "cancelada" })
-    .eq("id", id)
-    .in("status", ["agendada", "confirmada"])
-    .select("id");
+  const { error } = await supabase.rpc("cancelar_consulta", { p_id: id });
 
   if (error) {
-    redirect(destinoErro(id, dataConsulta, retorno, "salvar"));
-  }
-
-  if (!atualizadas || atualizadas.length === 0) {
-    redirect(destinoErro(id, dataConsulta, retorno, "status"));
+    redirect(
+      destinoErro(id, dataConsulta, retorno, chaveErroCancelamento(error)),
+    );
   }
 
   redirect(destinoSucesso(id, dataConsulta, retorno, "cancelada"));

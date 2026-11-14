@@ -248,6 +248,7 @@ export default async function AgendaPage({
                           inicio: consulta.inicio,
                         }}
                         podeGerenciar={podeMarcar}
+                        podeCancelar={false}
                         origem="agenda"
                       />
                     </div>

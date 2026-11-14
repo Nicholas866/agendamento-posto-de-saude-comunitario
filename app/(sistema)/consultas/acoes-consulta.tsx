@@ -33,18 +33,16 @@ type ConsultaAcao = {
 export function AcoesConsulta({
   consulta,
   podeGerenciar,
+  podeCancelar,
   origem,
   mostrarVazio = false,
 }: {
   consulta: ConsultaAcao;
   podeGerenciar: boolean;
+  podeCancelar: boolean;
   origem: "agenda" | "detalhe";
   mostrarVazio?: boolean;
 }) {
-  if (!podeGerenciar) {
-    return null;
-  }
-
   const diaDaConsulta = dataSP(consulta.inicio);
   const hoje = hojeSP();
   const emAberto =
@@ -52,13 +50,17 @@ export function AcoesConsulta({
   const concluida =
     consulta.status === "realizada" || consulta.status === "faltou";
 
-  const podePresenca = emAberto && diaDaConsulta <= hoje;
-  const podeDesfazer = concluida && diaDaConsulta <= hoje;
-  const podeCancelar =
-    origem === "detalhe" && emAberto && estaNoFuturo(consulta.inicio);
-  const avisoFuturo = origem === "detalhe" && emAberto && diaDaConsulta > hoje;
+  const podePresenca = podeGerenciar && emAberto && diaDaConsulta <= hoje;
+  const podeDesfazer = podeGerenciar && concluida && diaDaConsulta <= hoje;
+  const mostrarCancelar =
+    podeCancelar &&
+    origem === "detalhe" &&
+    emAberto &&
+    estaNoFuturo(consulta.inicio);
+  const avisoFuturo =
+    podeGerenciar && origem === "detalhe" && emAberto && diaDaConsulta > hoje;
 
-  const temBotoes = podePresenca || podeDesfazer || podeCancelar;
+  const temBotoes = podePresenca || podeDesfazer || mostrarCancelar;
 
   if (!temBotoes && !avisoFuturo) {
     return mostrarVazio ? (
@@ -109,7 +111,7 @@ export function AcoesConsulta({
             </form>
           ) : null}
 
-          {podeCancelar ? (
+          {mostrarCancelar ? (
             <form action={cancelarConsulta}>
               <input type="hidden" name="id" value={consulta.id} />
               <input type="hidden" name="retorno" value={retorno} />

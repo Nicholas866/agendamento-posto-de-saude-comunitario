@@ -38,6 +38,8 @@ export default async function ConsultaPage({
   const podeGerenciar =
     perfil.papel === "recepcao" || perfil.papel === "admin";
   const podeVerContato = podeGerenciar;
+  const podeCancelar =
+    podeGerenciar || perfil.papel === "profissional";
   const diaDaConsulta = dataSP(consulta.horario.inicio);
 
   const mensagemSucesso = mensagemSucessoConsulta(parametros.sucesso);
@@ -128,23 +130,24 @@ export default async function ConsultaPage({
       <section className="space-y-4 rounded-2xl border-2 border-gray-200 bg-white p-6 sm:p-8">
         <h2 className="text-2xl font-bold text-gray-900">Ações</h2>
 
-        {podeGerenciar ? (
-          <AcoesConsulta
-            consulta={{
-              id: consulta.id,
-              status: consulta.status,
-              inicio: consulta.horario.inicio,
-            }}
-            podeGerenciar={podeGerenciar}
-            origem="detalhe"
-            mostrarVazio
-          />
-        ) : (
+        {perfil.papel === "profissional" ? (
           <p className="text-lg text-gray-700">
-            Seu perfil pode consultar os dados, mas apenas a recepção e a
-            administração podem alterar a consulta.
+            Seu perfil pode consultar e cancelar consultas futuras. As demais
+            alterações são feitas pela recepção ou administração.
           </p>
-        )}
+        ) : null}
+
+        <AcoesConsulta
+          consulta={{
+            id: consulta.id,
+            status: consulta.status,
+            inicio: consulta.horario.inicio,
+          }}
+          podeGerenciar={podeGerenciar}
+          podeCancelar={podeCancelar}
+          origem="detalhe"
+          mostrarVazio={podeGerenciar}
+        />
       </section>
 
       <p className="text-base text-gray-600">

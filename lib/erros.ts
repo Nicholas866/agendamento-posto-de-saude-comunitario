@@ -59,3 +59,41 @@ export function mensagemDeErroBanco(
       return "Não foi possível salvar. Tente novamente em instantes.";
   }
 }
+
+export type ChaveErroCancelamento =
+  | "sem-permissao"
+  | "invalido"
+  | "status"
+  | "passado"
+  | "salvar";
+
+/**
+ * Converte o erro P0001 de public.cancelar_consulta em uma chave de
+ * mensagem já usada pela tela. Confere apenas o código e os textos fixos
+ * da função; não registra dados da consulta nem do usuário.
+ */
+export function chaveErroCancelamento(erro: ErroBanco): ChaveErroCancelamento {
+  if (erro.code !== "P0001") {
+    return "salvar";
+  }
+
+  const mensagem = erro.message ?? "";
+
+  if (mensagem.includes("perfil")) {
+    return "sem-permissao";
+  }
+
+  if (mensagem.includes("encontrada")) {
+    return "invalido";
+  }
+
+  if (mensagem.includes("ainda não aconteceram")) {
+    return "passado";
+  }
+
+  if (mensagem.includes("não pode mais ser cancelada")) {
+    return "status";
+  }
+
+  return "salvar";
+}

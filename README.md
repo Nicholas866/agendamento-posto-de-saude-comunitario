@@ -69,7 +69,7 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | **Horários** | Liberação de vários horários de uma vez para um profissional ativo (data, intervalo e duração de 15 a 60 minutos), sem duplicar nem sobrepor, e remoção de horários livres. |
 | **Nova consulta** | Escolha do paciente (com busca), do profissional ativo, do dia e de um horário livre. |
 | **Agenda do dia** | Consultas do dia agrupadas por profissional, com status em **cor e texto**, e navegação entre dias. |
-| **Detalhe da consulta** | Dados da consulta, cancelamento com confirmação (o horário volta a ficar livre) e marcação de **Realizada** ou **Faltou** com opção de desfazer. |
+| **Detalhe da consulta** | Dados da consulta, cancelamento com confirmação (o horário volta a ficar livre) e marcação de **Realizada** ou **Faltou** com opção de desfazer. O profissional também pode cancelar consultas futuras. |
 | **Painel de faltas** | Totais por status, taxa de faltas, gráficos de barras e tabelas por semana e por profissional, com filtro de período. |
 | **Usuários** | Exclusiva do administrador: lista as contas (nome, papel e e-mail) e cria novos acessos no Supabase Auth já confirmados, com o perfil correspondente. |
 
@@ -80,13 +80,16 @@ Já existe uma solução federal (agendamento online do PEC e-SUS APS), mas com 
 | Ver agenda, pacientes e detalhe da consulta | sim | sim | sim |
 | Ver CPF/Cartão SUS e telefone do paciente | sim | não | sim |
 | Cadastrar e editar pacientes | sim | não | sim |
-| Liberar horários e marcar/cancelar consultas | sim | não | sim |
+| Liberar horários e marcar consultas | sim | não | sim |
+| Cancelar consultas futuras | sim | sim | sim |
 | Marcar Realizada/Faltou e desfazer | sim | não | sim |
 | Cadastrar e editar profissionais | não | não | sim |
 | Ver o painel de faltas | sim | não | sim |
 | Criar contas de usuário (nome, e-mail, senha e papel) | não | não | sim |
 
-A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, RLS (Row Level Security) no banco, que é a autoridade final.
+A autorização é feita em camadas: redirecionamento no `proxy.ts`, checagem do perfil nas páginas e em cada Server Action e, por fim, RLS (Row Level Security) no banco, que é a autoridade final. O profissional cancela consultas pela função `cancelar_consulta` (SECURITY DEFINER), que confere o papel e altera apenas o status para `cancelada`; a política de `UPDATE` de `consultas` continua restrita à recepção e ao administrador.
+
+> **Limitação conhecida:** não há vínculo entre o usuário logado e o cadastro de profissional. Por isso, qualquer profissional pode cancelar a consulta de qualquer colega. O vínculo usuário–profissional está listado como trabalho futuro.
 
 ## Regras de negócio
 
@@ -150,7 +153,7 @@ npm install
 2. Abra **SQL Editor → New query**, cole o conteúdo de `supabase/schema.sql` e clique em **Run**.
 3. Faça o mesmo com `supabase/seed.sql`, que cria dados **fictícios** (5 pacientes, 2 profissionais, horários e consultas de exemplo).
 
-> Os arquivos `supabase/fase3.sql` e `supabase/fase3b.sql` são correções para bancos criados antes dessas etapas. Em uma instalação nova, o `schema.sql` já inclui tudo.
+> Os arquivos `supabase/fase3.sql`, `supabase/fase3b.sql` e `supabase/fase6.sql` são correções para bancos criados antes dessas etapas. Em uma instalação nova, o `schema.sql` já inclui tudo.
 
 ### 3. Criar os usuários de teste
 
@@ -226,7 +229,7 @@ Sugestão de roteiro de avaliação, entrando como **recepção**:
 3. Marcar a consulta em Nova consulta e conferir na Agenda.
 4. Cancelar uma consulta futura e ver o horário voltar a ficar livre.
 5. Marcar uma consulta passada como Faltou e conferir a taxa no Painel.
-6. Entrar como Profissional e verificar que ele só consulta, sem botões de alteração nem dados de contato.
+6. Entrar como Profissional e verificar que ele vê só o nome do paciente, sem dados de contato, e que consegue cancelar apenas consultas futuras — sem botões de Realizada/Faltou/Desfazer.
 
 ## Estrutura do projeto
 
@@ -241,7 +244,7 @@ lib/                     autenticação, validação, formatação, datas e aces
 supabase/
   schema.sql             tabelas, regras, gatilhos e RLS
   seed.sql               dados fictícios de exemplo
-  fase3.sql, fase3b.sql  correções para bancos já existentes
+  fase3.sql, fase3b.sql, fase6.sql  correções para bancos já existentes
 proxy.ts                 renovação de sessão e redirecionamento para o login
 AGENTS.md                regras e convenções do projeto
 PLANO.md                 roteiro de desenvolvimento por fases

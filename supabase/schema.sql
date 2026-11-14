@@ -1,23 +1,6 @@
--- =====================================================================
--- Agenda UBS — esquema do banco (Supabase / PostgreSQL)
--- Fase 1 do PLANO.md
---
--- Como aplicar:
---   1. Abra o painel do Supabase > SQL Editor.
---   2. Cole este arquivo inteiro e execute.
---   3. Crie os primeiros usuários em Authentication > Users e vincule
---      cada um a um perfil (exemplo no fim do arquivo).
---
--- LGPD: este esquema guarda apenas dados de contato e agenda.
--- NÃO existem colunas de diagnóstico, prontuário ou observações clínicas.
--- Testes devem usar somente dados fictícios.
--- =====================================================================
 
 create extension if not exists pgcrypto;
 
--- ---------------------------------------------------------------------
--- Tabelas
--- ---------------------------------------------------------------------
 
 create table if not exists public.perfis (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -89,8 +72,6 @@ create table if not exists public.consultas (
 comment on column public.consultas.token_confirmacao is
   'Token aleatório usado no link público de confirmar/cancelar (sem login).';
 
--- Regra: um horário não pode ter dois pacientes.
--- Consultas canceladas não contam, pois o horário volta a ficar livre.
 create unique index if not exists consultas_horario_ativo_unico
   on public.consultas (horario_id)
   where status <> 'cancelada';
@@ -101,12 +82,7 @@ create index if not exists consultas_paciente_idx
 create index if not exists consultas_status_idx
   on public.consultas (status);
 
--- ---------------------------------------------------------------------
--- Funções e gatilhos
--- ---------------------------------------------------------------------
 
--- Papel do usuário logado. SECURITY DEFINER evita recursão de RLS na
--- tabela perfis quando usado dentro das políticas.
 create or replace function public.papel_atual()
 returns text
 language sql
@@ -120,7 +96,6 @@ $$;
 revoke all on function public.papel_atual() from public;
 grant execute on function public.papel_atual() to authenticated;
 
--- Mantém atualizado_em sempre preenchido.
 create or replace function public.atualizar_timestamp()
 returns trigger
 language plpgsql
@@ -136,8 +111,6 @@ create trigger consultas_atualiza_timestamp
   before update on public.consultas
   for each row execute function public.atualizar_timestamp();
 
--- Mantém horarios.status coerente com as consultas:
--- consulta ativa ocupa o horário; sem consulta ativa, ele fica livre.
 create or replace function public.sincronizar_status_horario()
 returns trigger
 language plpgsql
@@ -145,7 +118,6 @@ security definer
 set search_path = public
 as $$
 begin
-  -- Horário antigo: em UPDATE que trocou de horário e em DELETE.
   if tg_op in ('UPDATE', 'DELETE') then
     update public.horarios h
        set status = case
@@ -160,8 +132,6 @@ begin
      where h.id = old.horario_id;
   end if;
 
-  -- Horário novo: em INSERT e em UPDATE que trocou de horário.
-  -- No UPDATE em que o horário não mudou, o bloco acima já resolveu.
   if tg_op = 'INSERT' then
     update public.horarios h
        set status = case
@@ -199,10 +169,6 @@ create trigger consultas_sincroniza_horario
   after insert or update or delete on public.consultas
   for each row execute function public.sincronizar_status_horario();
 
--- Regra de negócio no banco (defesa em profundidade):
--- não agenda no passado nem com mais de 30 dias de antecedência.
--- Só valida na criação e ao trocar de horário (remarcação), para não
--- impedir a atualização de status de uma consulta já realizada.
 create or replace function public.validar_agendamento()
 returns trigger
 language plpgsql
@@ -213,8 +179,6 @@ declare
   v_inicio timestamptz;
   v_removido_em timestamptz;
 begin
-  -- Só pula a validação quando o horário não mudou e a consulta não está
-  -- sendo reativada (cancelada -> agendada/confirmada).
   if tg_op = 'UPDATE'
      and new.horario_id is not distinct from old.horario_id
      and not (old.status = 'cancelada' and new.status <> 'cancelada') then
@@ -252,9 +216,6 @@ create trigger consultas_valida_agendamento
   before insert or update on public.consultas
   for each row execute function public.validar_agendamento();
 
--- ---------------------------------------------------------------------
--- RLS: acesso por papel
--- ---------------------------------------------------------------------
 
 alter table public.perfis enable row level security;
 alter table public.pacientes enable row level security;
@@ -262,7 +223,6 @@ alter table public.profissionais enable row level security;
 alter table public.horarios enable row level security;
 alter table public.consultas enable row level security;
 
--- perfis: cada usuário lê o próprio; admin lê e gerencia todos.
 drop policy if exists perfis_select on public.perfis;
 create policy perfis_select on public.perfis
   for select to authenticated
@@ -284,7 +244,6 @@ create policy perfis_delete on public.perfis
   for delete to authenticated
   using (public.papel_atual() = 'admin');
 
--- pacientes: todos os perfis leem; recepção e admin cadastram/editam.
 drop policy if exists pacientes_select on public.pacientes;
 create policy pacientes_select on public.pacientes
   for select to authenticated
@@ -306,7 +265,6 @@ create policy pacientes_delete on public.pacientes
   for delete to authenticated
   using (public.papel_atual() = 'admin');
 
--- profissionais: todos leem; só admin gerencia.
 drop policy if exists profissionais_select on public.profissionais;
 create policy profissionais_select on public.profissionais
   for select to authenticated
@@ -328,7 +286,6 @@ create policy profissionais_delete on public.profissionais
   for delete to authenticated
   using (public.papel_atual() = 'admin');
 
--- horarios: todos leem; recepção e admin liberam/gerenciam.
 drop policy if exists horarios_select on public.horarios;
 create policy horarios_select on public.horarios
   for select to authenticated
@@ -350,7 +307,6 @@ create policy horarios_delete on public.horarios
   for delete to authenticated
   using (public.papel_atual() in ('recepcao', 'admin'));
 
--- consultas: todos leem; recepção e admin marcam/atualizam.
 drop policy if exists consultas_select on public.consultas;
 create policy consultas_select on public.consultas
   for select to authenticated
@@ -372,8 +328,6 @@ create policy consultas_delete on public.consultas
   for delete to authenticated
   using (public.papel_atual() = 'admin');
 
--- Anon não acessa tabelas diretamente: o paciente só usa as funções
--- públicas por token (abaixo).
 revoke all on table public.perfis from anon;
 revoke all on table public.pacientes from anon;
 revoke all on table public.profissionais from anon;
@@ -386,13 +340,53 @@ grant select, insert, update, delete on table public.profissionais to authentica
 grant select, insert, update, delete on table public.horarios to authenticated;
 grant select, insert, update, delete on table public.consultas to authenticated;
 
--- ---------------------------------------------------------------------
--- Link público do paciente (Fase 4)
---
--- O paciente NÃO tem login. O link do e-mail carrega o token; estas
--- funções são SECURITY DEFINER para funcionar sem sessão (anon), mas
--- expõem apenas o necessário para a tela de confirmação.
--- ---------------------------------------------------------------------
+
+create or replace function public.cancelar_consulta(p_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status text;
+  v_inicio timestamptz;
+begin
+  if coalesce(public.papel_atual(), '') not in ('recepcao', 'profissional', 'admin') then
+    raise exception 'Seu perfil não tem acesso a essa ação.'
+      using errcode = 'P0001';
+  end if;
+
+  select c.status, h.inicio
+    into v_status, v_inicio
+  from public.consultas c
+  join public.horarios h on h.id = c.horario_id
+  where c.id = p_id
+  for update of c;
+
+  if not found then
+    raise exception 'Consulta não encontrada.'
+      using errcode = 'P0001';
+  end if;
+
+  if v_status not in ('agendada', 'confirmada') then
+    raise exception 'Esta consulta não pode mais ser cancelada.'
+      using errcode = 'P0001';
+  end if;
+
+  if v_inicio <= now() then
+    raise exception 'Só é possível cancelar consultas que ainda não aconteceram.'
+      using errcode = 'P0001';
+  end if;
+
+  update public.consultas
+     set status = 'cancelada'
+   where id = p_id;
+end;
+$$;
+
+revoke all on function public.cancelar_consulta(uuid) from public, anon;
+grant execute on function public.cancelar_consulta(uuid) to authenticated;
+
 
 create or replace function public.consulta_por_token(p_token uuid)
 returns table (
@@ -475,14 +469,3 @@ revoke all on function public.responder_consulta(uuid, text) from public;
 grant execute on function public.consulta_por_token(uuid) to anon, authenticated;
 grant execute on function public.responder_consulta(uuid, text) to anon, authenticated;
 
--- ---------------------------------------------------------------------
--- Primeiro administrador (exemplo — rode depois de criar o usuário
--- em Authentication > Users):
---
---   insert into public.perfis (id, nome, papel)
---   select id, 'Administrador Teste', 'admin'
---   from auth.users
---   where email = 'admin@exemplo.com';
---
--- Repita para os usuários de recepção e de profissional, trocando o papel.
--- ---------------------------------------------------------------------
