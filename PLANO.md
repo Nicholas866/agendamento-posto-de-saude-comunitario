@@ -56,16 +56,8 @@ Segurança: ativar RLS (Row Level Security) no Supabase, com acesso por papel.
 Cada fase termina com algo que você consegue **abrir e testar**.
 
 ### Fase 0 — Preparação (≈ 1 hora)
-- Criar projeto no Supabase e pegar URL e chave pública.
-- Colar o prompt de contexto no OpenCode.
-- **Pronto quando:** o OpenCode resumiu o projeto corretamente.
-
-**Prompt:**
-```
-Crie a estrutura inicial do projeto com Next.js, TypeScript e Tailwind.
-Configure a conexão com o Supabase usando variáveis de ambiente
-(.env.local, e crie um .env.example sem valores reais). Garanta que
-.env.local está no .gitignore. Crie uma página inicial simples.
+- Criar projeto e pegar URL e chave pública..
+local está no .gitignore. Crie uma página inicial simples.
 ```
 
 ### Fase 1 — Banco de dados e login (≈ 3 horas)
@@ -73,25 +65,10 @@ Configure a conexão com o Supabase usando variáveis de ambiente
 - Login com e-mail e senha; página protegida por perfil.
 - **Pronto quando:** consigo entrar como recepção e como admin e vejo telas diferentes.
 
-**Prompt:**
-```
-Crie o script SQL para o Supabase com as tabelas: perfis, pacientes,
-profissionais, horarios e consultas (campos no item 5 do PLANO.md).
-Inclua RLS por papel e uma regra que impede dois pacientes no mesmo horário.
-Depois implemente o login e proteja as rotas por papel. Me mostre o SQL
-antes de aplicar.
-```
-
 ### Fase 2 — Cadastros (≈ 3 horas)
 - Telas 3, 4 e 5: pacientes e profissionais (criar, editar, buscar).
 - **Pronto quando:** cadastro 5 pacientes e 2 profissionais fictícios.
 
-**Prompt:**
-```
-Crie as telas de pacientes (lista com busca, cadastro e edição) e de
-profissionais. Valide CPF/telefone/e-mail. Visual simples, letras grandes.
-Use só dados fictícios no seed.
-```
 
 ### Fase 3 — Horários e agenda (≈ 4 horas) — núcleo do sistema
 - Telas 6, 7, 8 e 2: liberar horários, marcar, remarcar, cancelar, agenda do dia.
